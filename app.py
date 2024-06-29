@@ -7,8 +7,7 @@ import hashlib
 import time
 
 # Configuration de Stripe
-stripe.api_key = "sk_test_..."  # Remplacez par votre clé secrète Stripe
-
+stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb" 
 # Chargement du fichier CSV des utilisateurs au démarrage de l'application
 users = {}
 
