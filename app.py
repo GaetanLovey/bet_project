@@ -24,6 +24,7 @@ if not st.session_state['authenticated']:
         if check_credentials(username, password):
             st.session_state['authenticated'] = True
             st.success('Login successful')
+            st.experimental_rerun()  # Recharge la page après une connexion réussie
         else:
             st.error('Invalid username or password')
 else:
