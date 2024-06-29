@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import requests
 import stripe
 import csv
 import hashlib
@@ -43,10 +42,17 @@ def create_user(username, password, subscription):
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
     users[username] = {'password': hashed_password, 'authenticated': False, 'subscription': subscription, 'paid': False}
 
-    # Ajout de l'utilisateur au fichier CSV
-    with open('users.csv', 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([username, hashed_password, subscription, 'False'])
+    # Écriture de tous les utilisateurs dans le fichier CSV
+    with open('users.csv', 'w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
+        writer.writeheader()
+        for user, details in users.items():
+            writer.writerow({
+                'Username': user,
+                'Password': details['password'],
+                'Subscription': details['subscription'],
+                'Paid': 'True' if details['paid'] else 'False'
+            })
 
     return True
 
