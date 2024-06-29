@@ -68,6 +68,7 @@ def check_credentials(username, password):
     return False
 
 # Mise à jour de l'état de paiement dans le fichier CSV
+# Mise à jour de l'état de paiement dans le fichier CSV
 def update_payment_status(username):
     users = load_users()
     if username in users:
@@ -76,7 +77,15 @@ def update_payment_status(username):
             writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
             writer.writeheader()
             for user, details in users.items():
-                writer.writerow([user, details['password'], details['subscription'], 'True' if details['paid'] else 'False'])
+                # Vérifier et ajouter les clés manquantes
+                details.setdefault('subscription', '')
+                details.setdefault('paid', False)
+                writer.writerow({
+                    'Username': user,
+                    'Password': details['password'],
+                    'Subscription': details['subscription'],
+                    'Paid': 'True' if details['paid'] else 'False'
+                })
 
 # Page de connexion
 def login_page():
