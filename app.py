@@ -7,7 +7,8 @@ import hashlib
 import time
 
 # Configuration de Stripe
-stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb" 
+stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb"
+
 # Chargement du fichier CSV des utilisateurs au démarrage de l'application
 users = {}
 
@@ -44,18 +45,6 @@ def create_user(username, password, subscription):
         writer.writerow([username, hashed_password, subscription, 'False'])
 
     return True
-
-# Fonction pour vérifier les identifiants
-def check_credentials(username, password):
-    if username in users:
-        hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        if users[username]['password'] == hashed_password and users[username]['paid']:
-            users[username]['authenticated'] = True
-            return True
-    return False
-
-# Chargement initial des utilisateurs au démarrage de l'application
-load_users()
 
 # Page de connexion
 def login_page():
@@ -256,8 +245,8 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url="https://betproject.streamlit.app",  # URL de succès du paiement
-                cancel_url="https://https://betproject.streamlit.app/payment-cancel",    # URL d'annulation du paiement
+                success_url="https://betproject.streamlit.app?payment-success=1",  # URL de succès du paiement
+                cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
             )
             st.markdown(f"[Complete your payment]({session.url})")
         else:
@@ -275,8 +264,8 @@ if 'authenticated' not in st.session_state:
 # Détermination de la page actuelle
 query_params = st.experimental_get_query_params()
 if 'payment-success' in query_params:
-    st.title('Payment Successful')
-    st.markdown('Your payment was successful. Your account has been created.')
+    main_page()  # Afficher la page principale après le succès du paiement
+    st.success('Your payment was successful. Your account has been created.')
     time.sleep(2)  # Attente pour s'assurer que l'état est mis à jour dans le fichier CSV
     load_users()  # Recharger les utilisateurs depuis le fichier mis à jour
     st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
