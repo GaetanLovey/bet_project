@@ -144,7 +144,7 @@ def fetch_and_display_odds():
 sports_list = get_sports_list(API_KEY)
 
 # Affichage des widgets dans l'interface Streamlit
-fetch_button = st.sidebar.button('Fetch')
+fetch_button = st.button('Fetch')
 
 # Gestion de l'événement de clic du bouton
 if fetch_button:
