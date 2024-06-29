@@ -10,10 +10,8 @@ import time
 stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb"
 
 # Chargement du fichier CSV des utilisateurs au démarrage de l'application
-users = {}
-
 def load_users():
-    global users
+    users = {}
     try:
         with open('users.csv', 'r') as file:
             reader = csv.DictReader(file)
@@ -30,8 +28,11 @@ def load_users():
             writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
             writer.writeheader()
 
+    return users
+
 # Fonction pour créer un nouvel utilisateur
 def create_user(username, password, subscription):
+    users = load_users()  # Charger les utilisateurs actuels
     if username in users:
         return False  # L'utilisateur existe déjà
 
@@ -48,6 +49,7 @@ def create_user(username, password, subscription):
 
 # Vérification des identifiants de connexion
 def check_credentials(username, password):
+    users = load_users()  # Charger les utilisateurs actuels
     if username in users:
         hashed_password = users[username]['password']
         # Comparaison du mot de passe haché
@@ -277,7 +279,6 @@ if 'payment-success' in query_params:
     main_page()  # Afficher la page principale après le succès du paiement
     st.success('Your payment was successful. Your account has been created.')
     time.sleep(2)  # Attente pour s'assurer que l'état est mis à jour dans le fichier CSV
-    load_users()  # Recharger les utilisateurs depuis le fichier mis à jour
     st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
     st.experimental_rerun()
 
