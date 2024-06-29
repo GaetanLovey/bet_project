@@ -81,6 +81,7 @@ def main_page():
     if st.button('Logout'):
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
+        st.session_state.sync()  # Synchroniser l'état de session
         st.experimental_rerun()  # Recharger la page pour appliquer l'état de déconnexion
 
     # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
@@ -282,6 +283,7 @@ if 'payment-success' in query_params:
     time.sleep(2)  # Attente pour s'assurer que l'état est mis à jour dans le fichier CSV
     st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
     st.experimental_rerun()
+    st.stop()  # Arrêter l'exécution après la page principale
 
 elif 'payment-cancel' in query_params:
     cancel_page()
