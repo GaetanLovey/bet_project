@@ -46,6 +46,12 @@ def create_user(username, password, subscription):
 
     return True
 
+# Fonction pour vérifier les informations d'identification
+def check_credentials(username, password):
+    if username in users and users[username]['password'] == hashlib.sha256(password.encode()).hexdigest():
+        return True
+    return False
+
 # Page de connexion
 def login_page():
     st.title('Login')
@@ -58,7 +64,7 @@ def login_page():
             st.session_state['authenticated'] = True
             st.session_state['username'] = username
             st.success('Login successful')
-            st.experimental_rerun()
+            st.experimental_rerun()  # Rerun the app to reflect the change in authentication state
         else:
             st.error('Invalid username or password')
 
@@ -66,32 +72,9 @@ def login_page():
 def main_page():
     st.title('Interesting games')
 
-    # Utilisation de st.empty() pour créer une zone vide que nous allons remplir avec les widgets
-    container = st.empty()
-
-    # Affichage du bouton de déconnexion dans le coin supérieur droit
-    with container:
-        # Utilisation de la mise en page de colonnes pour positionner le bouton de déconnexion à droite
-        col1, col2 = st.columns([10, 1])  # La première colonne prend 10/11 de l'espace, la deuxième prend 1/11
-        with col1:
-            st.write("")  # Laissez une ligne vide pour ajuster la hauteur
-
-            # Bouton de déconnexion avec positionnement CSS
-            st.markdown(
-                """
-                <style>
-                .logout-button {
-                    position: absolute;
-                    top: 8px;
-                    right: 8px;
-                }
-                </style>
-                """
-            , unsafe_allow_html=True)
-            
-            if st.button('Logout', class_='logout-button'):
-                st.session_state['authenticated'] = False
-                st.experimental_rerun()
+    if st.button('Logout'):
+        st.session_state['authenticated'] = False
+        st.experimental_rerun()  # Rerun the app to reflect the change in authentication state
 
     # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
     df = pd.read_excel('df.xlsx')
@@ -227,16 +210,12 @@ def main_page():
     # Utilisation de st.sidebar pour placer les widgets de sélection dans le sidebar
     sport_keys = st.sidebar.multiselect('Choose sports:', sports_list)
     regions = st.sidebar.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
-    markets = st.sidebar.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
-    odds_format = st.sidebar.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
-    date_format = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'], index=0)
+    markets = st.sidebar.multiselect('Choose markets:', ['h2h', 'spreads', 'totals'], default=['h2h'])
+    odds_format = st.sidebar.selectbox('Odds format:', ['decimal', 'american'])
+    date_format = st.sidebar.selectbox('Date format:', ['iso', 'unix'])
 
-    # Utilisation d'un bouton d'action dans le sidebar pour récupérer les données
-    fetch_button = st.sidebar.button('Fetch')
-
-    # Vérification si le bouton "Fetch" est cliqué
-    if fetch_button:
-        # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
+    # Bouton pour récupérer et afficher les cotes
+    if st.sidebar.button('Fetch Odds'):
         fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
 
 # Page de création de compte
@@ -274,11 +253,6 @@ def signup_page():
         else:
             st.error('Username already exists. Please choose another one.')
 
-# Page d'annulation de paiement
-def cancel_page():
-    st.title('Payment Cancelled')
-    st.error('Your payment was cancelled. Please try again.')
-
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
@@ -294,7 +268,8 @@ if 'payment-success' in query_params:
     st.experimental_rerun()
 
 elif 'payment-cancel' in query_params:
-    cancel_page()
+    st.title('Payment Cancelled')
+    st.error('Your payment was cancelled. Please try again.')
 
 else:
     # Sélection de la page à afficher
