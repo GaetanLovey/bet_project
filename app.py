@@ -6,7 +6,7 @@ import csv
 import hashlib
 
 # Configuration de Stripe
-stripe.api_key = "sk_test_YOUR_SECRET_KEY"  # Remplacez par votre clé secrète Stripe
+stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb"  # Remplacez par votre clé secrète Stripe
 
 # Chargement du fichier CSV des utilisateurs au démarrage de l'application
 users = {}
@@ -96,8 +96,8 @@ def main_page():
                 'quantity': 1,
             }],
             mode='payment',
-            success_url="https://your-success-url.com",
-            cancel_url="https://your-cancel-url.com",
+            success_url="https://your-success-url.com",  # Remplacez par votre URL de succès
+            cancel_url="https://your-cancel-url.com",    # Remplacez par votre URL d'annulation
         )
         st.markdown(f"[Complete your payment]({session.url})")
 
