@@ -69,13 +69,7 @@ def update_payment_status(username):
             writer = csv.DictWriter(file, fieldnames=fieldnames)
 
             writer.writeheader()
-            for user, details in users.items():
-                writer.writerow({
-                    'Username': user,
-                    'Password': details['password'],
-                    'Subscription': details['subscription'],
-                    'Paid': 'True' if details['paid'] else 'False'
-                })
+            writer.writerows(users.values())  # Écrire toutes les lignes mises à jour
 
 # Page de connexion
 def login_page():
