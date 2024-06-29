@@ -3,16 +3,16 @@ import pandas as pd
 import stripe
 import csv
 import hashlib
+import urllib.parse  # Import pour l'encodage d'URL
 from data_fetching import load_data, get_sports_list, fetch_and_display_odds
 
 # Clé API à utiliser pour les appels de données sportives
 API_KEY = '9a58d306f402d400af1cafd8c6152ec9'
 
-# Configuration de Stripe (utilisez votre clé API Stripe appropriée ici)
+# Configuration de Stripe
 stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb"
 
 # Chargement du fichier CSV des utilisateurs au démarrage de l'application
-@st.cache(allow_output_mutation=True)
 def load_users():
     users = {}
     try:
@@ -95,7 +95,6 @@ def login_page():
             st.session_state['authenticated'] = True
             st.session_state['username'] = username
             st.success('Login successful')
-            st.experimental_rerun()  # Actualiser la page pour appliquer les changements d'authentification
         else:
             st.error('Invalid username or password')
 
@@ -137,23 +136,26 @@ def signup_page():
             product_name = subscription
             product_price = 10.00 if subscription == 'Monthly Subscription' else 100.00
 
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price_data': {
-                        'currency': 'usd',
-                        'product_data': {
-                            'name': product_name,
+            try:
+                session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    line_items=[{
+                        'price_data': {
+                            'currency': 'usd',
+                            'product_data': {
+                                'name': product_name,
+                            },
+                            'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
                         },
-                        'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
-                    },
-                    'quantity': 1,
-                }],
-                mode='payment',
-                success_url=f"https://betproject.streamlit.app?payment-success=1&username={username}",  # URL de succès du paiement
-                cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
-            )
-            st.markdown(f"[Complete your payment]({session.url})")
+                        'quantity': 1,
+                    }],
+                    mode='payment',
+                    success_url=f"https://betproject.streamlit.app?payment-success=1&username={urllib.parse.quote(username)}",
+                    cancel_url="https://betproject.streamlit.app?payment-cancel=1",
+                )
+                st.markdown(f"[Complete your payment]({session.url})")
+            except stripe.error.StripeError as e:
+                st.error(f"Stripe error occurred: {e}")
         else:
             st.error('Username already exists. Please choose another one.')
 
@@ -166,27 +168,18 @@ def cancel_page():
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
     st.session_state['username'] = None
-    st.session_state['payment_success'] = False  # État pour suivre le succès du paiement
 
 # Détermination de la page actuelle
-query_params = st.experimental_get_query_params()
+query_params = st.query_params()
 if 'payment-success' in query_params:
     username = query_params.get('username', [None])[0]
     if username:
         update_payment_status(username)  # Mise à jour du statut de paiement
         st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
         st.session_state['username'] = username  # Mettre à jour l'état du nom d'utilisateur
-        st.session_state['payment_success'] = True  # Indiquer que le paiement a réussi
 
-# Vérifier si l'utilisateur est authentifié et si le paiement a réussi pour afficher la bonne page
+# Vérifier si l'utilisateur est authentifié pour afficher la bonne page
 if st.session_state['authenticated']:
     main_page()  # Afficher la page principale si l'utilisateur est authentifié
-elif 'payment-cancel' in query_params:
-    cancel_page()  # Afficher la page d'annulation de paiement si l'utilisateur a annulé le paiement
 else:
-    # Sélection de la page à afficher si l'utilisateur n'est pas encore authentifié
-    page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
-    if page == 'Login':
-        login_page()
-    elif page == 'Sign Up':
-        signup_page()
+    signup_page()  # Afficher la page de création de compte sinon
