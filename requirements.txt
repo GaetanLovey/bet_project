@@ -6,4 +6,4 @@ requests
 ipywidgets
 IPython 
 display
-streamlit_authenticator
+streamlit-authenticator
