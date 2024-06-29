@@ -2,26 +2,55 @@ import streamlit as st
 import pandas as pd
 import requests
 import stripe
+import csv
+import hashlib
 
 # Configuration de Stripe
 stripe.api_key = "sk_test_YOUR_SECRET_KEY"  # Remplacez par votre clé secrète Stripe
 
-# Structure de données pour stocker les utilisateurs
+# Chargement du fichier CSV des utilisateurs au démarrage de l'application
 users = {}
+
+def load_users():
+    global users
+    try:
+        with open('users.csv', 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                users[row['Username']] = {
+                    'password': row['Password'],
+                    'authenticated': False
+                }
+    except FileNotFoundError:
+        # Créer le fichier users.csv s'il n'existe pas encore
+        with open('users.csv', 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=['Username', 'Password'])
+            writer.writeheader()
 
 # Fonction pour créer un nouvel utilisateur
 def create_user(username, password):
     if username in users:
         return False  # L'utilisateur existe déjà
-    users[username] = {'password': password, 'authenticated': False}
+    # Hash du mot de passe pour le stockage sécurisé
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    users[username] = {'password': hashed_password, 'authenticated': False}
+    # Ajout de l'utilisateur au fichier CSV
+    with open('users.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([username, hashed_password])
     return True
 
 # Fonction pour vérifier les identifiants
 def check_credentials(username, password):
-    if username in users and users[username]['password'] == password:
-        users[username]['authenticated'] = True
-        return True
+    if username in users:
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        if users[username]['password'] == hashed_password:
+            users[username]['authenticated'] = True
+            return True
     return False
+
+# Chargement initial des utilisateurs au démarrage de l'application
+load_users()
 
 # Page de connexion
 def login_page():
