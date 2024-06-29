@@ -282,7 +282,6 @@ if 'payment-success' in query_params:
     st.success('Your payment was successful. Your account has been created.')
     time.sleep(2)  # Attente pour s'assurer que l'état est mis à jour dans le fichier CSV
     st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
-    st.experimental_rerun()
     st.stop()  # Arrêter l'exécution après la page principale
 
 elif 'payment-cancel' in query_params:
