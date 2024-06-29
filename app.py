@@ -105,6 +105,12 @@ def login_page():
 def main_page(username):
     st.title('Welcome to Bet Project')
 
+    # Bouton Log Out
+    if st.button('Log Out'):
+        st.session_state['authenticated'] = False
+        st.session_state['username'] = None
+        st.experimental_rerun()
+
     # Utilisation des fonctions importées pour charger et afficher les données
     df = load_data()
     st.write("Bookmaker above average :")
