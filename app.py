@@ -6,14 +6,8 @@ import stripe
 # Configuration de Stripe
 stripe.api_key = "sk_test_YOUR_SECRET_KEY"  # Remplacez par votre clé secrète Stripe
 
-# Configuration de la connexion (modifiez ces valeurs)
-USERNAME = "user"
-PASSWORD = "password"
-
-# Structure de données pour stocker les utilisateurs (à remplacer par une base de données dans un projet réel)
-users = {
-    USERNAME: {'password': PASSWORD, 'email': 'user@example.com', 'authenticated': False}
-}
+# Structure de données pour stocker les utilisateurs (simulant une base de données)
+users = {}
 
 # Fonction pour créer un nouvel utilisateur
 def create_user(username, password, email):
