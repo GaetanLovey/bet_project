@@ -8,7 +8,7 @@ from data_fetching import load_data, get_sports_list, fetch_and_display_odds
 # Clé API à utiliser pour les appels de données sportives
 API_KEY = '9a58d306f402d400af1cafd8c6152ec9'
 
-# Configuration de Stripe
+# Configuration de Stripe (utilisez votre clé API Stripe appropriée ici)
 stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb"
 
 # Chargement du fichier CSV des utilisateurs au démarrage de l'application
@@ -164,6 +164,7 @@ def cancel_page():
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
     st.session_state['username'] = None
+    st.session_state['payment_success'] = False  # État pour suivre le succès du paiement
 
 # Détermination de la page actuelle
 query_params = st.experimental_get_query_params()
@@ -173,19 +174,18 @@ if 'payment-success' in query_params:
         update_payment_status(username)  # Mise à jour du statut de paiement
         st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
         st.session_state['username'] = username  # Mettre à jour l'état du nom d'utilisateur
-        st.success('Your payment was successful. Your account has been created.')
-    st.experimental_rerun()  # Recharger la page pour appliquer l'état mis à jour
+        st.session_state['payment_success'] = True  # Indiquer que le paiement a réussi
 
+# Vérifier si l'utilisateur est authentifié et si le paiement a réussi pour afficher la bonne page
+if st.session_state['payment_success'] and st.session_state['authenticated']:
+    main_page()  # Afficher la page principale si l'utilisateur est authentifié et le paiement a réussi
 elif 'payment-cancel' in query_params:
-    cancel_page()
-
+    cancel_page()  # Afficher la page d'annulation de paiement si l'utilisateur a annulé le paiement
 else:
-    # Sélection de la page à afficher
+    # Sélection de la page à afficher si l'utilisateur n'est pas encore authentifié
     if not st.session_state['authenticated']:
         page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
         if page == 'Login':
             login_page()
         elif page == 'Sign Up':
             signup_page()
-    else:
-        main_page()
