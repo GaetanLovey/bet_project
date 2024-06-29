@@ -172,7 +172,7 @@ def success_page():
         update_payment_status(username)
         st.session_state['authenticated'] = True
         st.session_state['username'] = username
-        # st.experimental_rerun()
+        st.experimental_rerun()
 
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
