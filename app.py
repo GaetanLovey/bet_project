@@ -178,6 +178,15 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
     st.session_state['username'] = None
 
+# Détermination de la page actuelle
+query_params = st.experimental_get_query_params()
+if 'payment-success' in query_params:
+    username = query_params.get('username', [None])[0]
+    if username:
+        update_payment_status(username)  # Mise à jour du statut de paiement
+        st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
+        st.session_state['username'] = username  # Mettre à jour l'état du nom d'utilisateur
+
 # Afficher la bonne page en fonction de l'état d'authentification
 if st.session_state['authenticated']:
     main_page(st.session_state['username'])  # Afficher la page principale si l'utilisateur est authentifié
