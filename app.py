@@ -1,10 +1,8 @@
 import streamlit as st
 import pandas as pd
-import requests
 import stripe
 import csv
 import hashlib
-import time
 from data_fetching import load_data, get_sports_list, fetch_and_display_odds
 
 # Clé API à utiliser pour les appels de données sportives
@@ -122,9 +120,7 @@ def main_page():
     if st.button('Logout'):
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
-        st.session_state['password'] = None  # Réinitialisation du mot de passe à None
         st.experimental_rerun()  # Recharger la page pour appliquer l'état de déconnexion
-
 
 # Page de création de compte
 def signup_page():
