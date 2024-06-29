@@ -102,8 +102,8 @@ def login_page():
             st.error('Invalid username or password')
 
 # Page principale après connexion
-def main_page():
-    st.title('Interesting games')
+def main_page(username):
+    st.title('Welcome to Bet Project')
 
     # Utilisation des fonctions importées pour charger et afficher les données
     df = load_data()
@@ -181,8 +181,15 @@ if 'payment-success' in query_params:
         st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
         st.session_state['username'] = username  # Mettre à jour l'état du nom d'utilisateur
 
-# Vérifier si l'utilisateur est authentifié pour afficher la bonne page
+# Afficher la bonne page en fonction de l'état d'authentification
 if st.session_state['authenticated']:
-    main_page()  # Afficher la page principale si l'utilisateur est authentifié
+    main_page(st.session_state['username'])  # Afficher la page principale si l'utilisateur est authentifié
 else:
-    signup_page()  # Afficher la page de création de compte sinon
+    st.write('Welcome to Bet Project')
+    st.write('Please select an option below:')
+    option = st.selectbox('Choose an option:', ['Sign Up', 'Login'])
+
+    if option == 'Sign Up':
+        signup_page()  # Afficher la page de création de compte
+    elif option == 'Login':
+        login_page()  # Afficher la page de login
