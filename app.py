@@ -30,11 +30,13 @@ def get_sports_list(api_key):
 
 # Fonction pour récupérer et afficher les cotes en fonction des paramètres sélectionnés
 def fetch_and_display_odds():
-    sport_keys = sport_select.multiselect('Choose sports:', sports_list)
-    regions = regions_select.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
-    markets = markets_dropdown.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
-    odds_format = odds_format_dropdown.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
-    date_format = date_format_dropdown.selectbox('Choose date format:', ['iso', 'unix'], index=0)
+    sports_list = get_sports_list(API_KEY)
+    
+    sport_keys = st.sidebar.multiselect('Choose sports:', sports_list)
+    regions = st.sidebar.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
+    markets = st.sidebar.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
+    odds_format = st.sidebar.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
+    date_format = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'], index=0)
 
     params = {
         'api_key': API_KEY,
@@ -142,16 +144,8 @@ def fetch_and_display_odds():
 sports_list = get_sports_list(API_KEY)
 
 # Affichage des widgets dans l'interface Streamlit
-sport_select = st.sidebar.selectbox('Choose sports:', sports_list)
-regions_select = st.sidebar.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
-markets_dropdown = st.sidebar.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
-odds_format_dropdown = st.sidebar.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
-date_format_dropdown = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'], index=0)
-
-# Bouton pour récupérer les données
 fetch_button = st.sidebar.button('Fetch')
 
 # Gestion de l'événement de clic du bouton
 if fetch_button:
     fetch_and_display_odds()
-
