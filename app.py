@@ -252,8 +252,8 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=f"http://localhost:8501/?success=true&username={username}",  # Utilisez la bonne URL de votre application
-                cancel_url="http://localhost:8501/?cancel=true",    # Utilisez la bonne URL de votre application
+                success_url=f"https://betproject.streamlit.app/success?username={username}",  # Remplacez par votre URL de succès
+                cancel_url="https://betproject.streamlit.app/cancel",    # Remplacez par votre URL d'annulation
             )
             st.markdown(f"[Complete your payment]({session.url})")
         else:
@@ -261,19 +261,8 @@ def signup_page():
 
 # Page de succès de paiement
 def success_page():
-    st.title('Payment Successful')
-    st.success('Your payment was successful! You are now logged in.')
+    main_page()
 
-    # Récupérer le nom d'utilisateur de l'URL
-    query_params = st.experimental_get_query_params()
-    username = query_params.get('username', [None])[0]
-
-    if username:
-        # Authentifier l'utilisateur automatiquement
-        st.session_state['authenticated'] = True
-        st.session_state['username'] = username
-
-    st.experimental_rerun()
 
 # Page d'annulation de paiement
 def cancel_page():
