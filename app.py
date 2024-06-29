@@ -66,10 +66,29 @@ def login_page():
 def main_page():
     st.title('Interesting games')
 
-    # Ajout d'un bouton de déconnexion
-    if st.button('Logout'):
-        st.session_state['authenticated'] = False
-        st.experimental_rerun()
+    # Utilisation de st.beta_container() pour créer une disposition flexible
+    container = st.beta_container()
+
+    # Affichage du bouton de déconnexion dans le conteneur flexible
+    with container:
+        st.write("")  # Laissez une ligne vide pour ajuster la hauteur du conteneur
+
+        # Bouton de déconnexion en haut à droite avec CSS personnalisé
+        st.markdown(
+            """
+            <style>
+            .logout-button {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+            }
+            </style>
+            """
+        , unsafe_allow_html=True)
+        
+        if st.button('Logout', class_='logout-button'):
+            st.session_state['authenticated'] = False
+            st.experimental_rerun()
 
     # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
     df = pd.read_excel('df.xlsx')
