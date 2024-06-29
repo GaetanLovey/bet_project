@@ -179,15 +179,14 @@ if 'payment-success' in query_params:
         st.session_state['payment_success'] = True  # Indiquer que le paiement a réussi
 
 # Vérifier si l'utilisateur est authentifié et si le paiement a réussi pour afficher la bonne page
-if st.session_state['payment_success'] and st.session_state['authenticated']:
-    main_page()  # Afficher la page principale si l'utilisateur est authentifié et le paiement a réussi
+if st.session_state['authenticated']:
+    main_page()  # Afficher la page principale si l'utilisateur est authentifié
 elif 'payment-cancel' in query_params:
     cancel_page()  # Afficher la page d'annulation de paiement si l'utilisateur a annulé le paiement
 else:
     # Sélection de la page à afficher si l'utilisateur n'est pas encore authentifié
-    if not st.session_state['authenticated']:
-        page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
-        if page == 'Login':
-            login_page()
-        elif page == 'Sign Up':
-            signup_page()
+    page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
+    if page == 'Login':
+        login_page()
+    elif page == 'Sign Up':
+        signup_page()
