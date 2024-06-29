@@ -256,7 +256,7 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url="https://https://betproject.streamlit.app/payment-success",  # URL de succès du paiement
+                success_url="https://https://betproject.streamlit.app",  # URL de succès du paiement
                 cancel_url="https://https://betproject.streamlit.app/payment-cancel",    # URL d'annulation du paiement
             )
             st.markdown(f"[Complete your payment]({session.url})")
