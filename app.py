@@ -88,7 +88,6 @@ def login_page():
             st.session_state['authenticated'] = True
             st.session_state['username'] = username
             st.success('Login successful')
-            st.experimental_rerun()  # Recharger la page pour appliquer l'état d'authentification
         else:
             st.error('Invalid username or password')
 
@@ -169,8 +168,7 @@ if 'payment-success' in query_params:
         st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
         st.session_state['username'] = username  # Mettre à jour l'état du nom d'utilisateur
         st.success('Your payment was successful. Your account has been created.')
-        st.experimental_rerun()  # Recharger la page pour appliquer l'état mis à jour
-    main_page()  # Afficher la page principale après le paiement
+    st.experimental_rerun()  # Recharger la page pour appliquer l'état mis à jour
 
 elif 'payment-cancel' in query_params:
     cancel_page()
