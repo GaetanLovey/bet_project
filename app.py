@@ -67,7 +67,7 @@ else:
         for sport_key in sport_keys:
             url = ODDS_URL.format(sport=sport_key)
             response = requests.get(url, params=params)
-            if response.status_code == 200):
+            if response.status_code == 200:
                 odds_json = response.json()
                 all_odds.extend(odds_json)
                 st.success(f'Sport: {sport_key}, Number of events: {len(odds_json)}')
