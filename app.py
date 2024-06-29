@@ -19,25 +19,26 @@ def load_users():
             for row in reader:
                 users[row['Username']] = {
                     'password': row['Password'],
-                    'authenticated': False
+                    'authenticated': False,
+                    'subscription': row.get('Subscription', None)
                 }
     except FileNotFoundError:
         # Créer le fichier users.csv s'il n'existe pas encore
         with open('users.csv', 'w', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=['Username', 'Password'])
+            writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription'])
             writer.writeheader()
 
 # Fonction pour créer un nouvel utilisateur
-def create_user(username, password):
+def create_user(username, password, subscription):
     if username in users:
         return False  # L'utilisateur existe déjà
     # Hash du mot de passe pour le stockage sécurisé
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    users[username] = {'password': hashed_password, 'authenticated': False}
+    users[username] = {'password': hashed_password, 'authenticated': False, 'subscription': subscription}
     # Ajout de l'utilisateur au fichier CSV
     with open('users.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([username, hashed_password])
+        writer.writerow([username, hashed_password, subscription])
     return True
 
 # Fonction pour vérifier les identifiants
@@ -62,6 +63,7 @@ def login_page():
     if st.button('Login'):
         if check_credentials(username, password):
             st.session_state['authenticated'] = True
+            st.session_state['username'] = username
             st.success('Login successful')
             st.experimental_rerun()
         else:
@@ -219,6 +221,7 @@ def main_page():
 
     # Vérification si le bouton "Fetch" est cliqué
     if fetch_button:
+        # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
         fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
 
 # Page de création de compte
@@ -227,10 +230,32 @@ def signup_page():
 
     username = st.text_input('Choose a username')
     password = st.text_input('Choose a password', type='password')
+    subscription = st.selectbox('Choose a subscription', ['Monthly Subscription', 'Annual Subscription'])
 
     if st.button('Sign Up'):
-        if create_user(username, password):
-            st.success('Account created successfully. Please log in.')
+        if create_user(username, password, subscription):
+            st.success('Account created successfully. Redirecting to payment...')
+            # Créer une session de paiement Stripe
+            product_name = subscription
+            product_price = 10.00 if subscription == 'Monthly Subscription' else 100.00
+
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': product_name,
+                        },
+                        'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url="https://betproject.streamlit.app/success",  # Remplacez par votre URL de succès
+                cancel_url="https://betproject.streamlit.app/cancel",    # Remplacez par votre URL d'annulation
+            )
+            st.markdown(f"[Complete your payment]({session.url})")
         else:
             st.error('Username already exists. Please choose another one.')
 
