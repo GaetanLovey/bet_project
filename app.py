@@ -46,10 +46,13 @@ def create_user(username, password, subscription):
 
     return True
 
-# Fonction pour vérifier les informations d'identification
+# Vérification des identifiants de connexion
 def check_credentials(username, password):
-    if username in users and users[username]['password'] == hashlib.sha256(password.encode()).hexdigest():
-        return True
+    if username in users:
+        hashed_password = users[username]['password']
+        # Comparaison du mot de passe haché
+        if hashed_password == hashlib.sha256(password.encode()).hexdigest():
+            return True
     return False
 
 # Page de connexion
@@ -64,7 +67,6 @@ def login_page():
             st.session_state['authenticated'] = True
             st.session_state['username'] = username
             st.success('Login successful')
-            st.experimental_rerun()  # Rerun the app to reflect the change in authentication state
         else:
             st.error('Invalid username or password')
 
@@ -72,9 +74,11 @@ def login_page():
 def main_page():
     st.title('Interesting games')
 
+    # Ajout d'un bouton de déconnexion
     if st.button('Logout'):
         st.session_state['authenticated'] = False
-        st.experimental_rerun()  # Rerun the app to reflect the change in authentication state
+        st.session_state['username'] = None
+        st.experimental_rerun()
 
     # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
     df = pd.read_excel('df.xlsx')
@@ -210,12 +214,16 @@ def main_page():
     # Utilisation de st.sidebar pour placer les widgets de sélection dans le sidebar
     sport_keys = st.sidebar.multiselect('Choose sports:', sports_list)
     regions = st.sidebar.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
-    markets = st.sidebar.multiselect('Choose markets:', ['h2h', 'spreads', 'totals'], default=['h2h'])
-    odds_format = st.sidebar.selectbox('Odds format:', ['decimal', 'american'])
-    date_format = st.sidebar.selectbox('Date format:', ['iso', 'unix'])
+    markets = st.sidebar.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
+    odds_format = st.sidebar.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
+    date_format = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'], index=0)
 
-    # Bouton pour récupérer et afficher les cotes
-    if st.sidebar.button('Fetch Odds'):
+    # Utilisation d'un bouton d'action dans le sidebar pour récupérer les données
+    fetch_button = st.sidebar.button('Fetch')
+
+    # Vérification si le bouton "Fetch" est cliqué
+    if fetch_button:
+        # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
         fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
 
 # Page de création de compte
@@ -253,9 +261,15 @@ def signup_page():
         else:
             st.error('Username already exists. Please choose another one.')
 
+# Page d'annulation de paiement
+def cancel_page():
+    st.title('Payment Cancelled')
+    st.error('Your payment was cancelled. Please try again.')
+
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
+    st.session_state['username'] = None
 
 # Détermination de la page actuelle
 query_params = st.experimental_get_query_params()
@@ -268,8 +282,7 @@ if 'payment-success' in query_params:
     st.experimental_rerun()
 
 elif 'payment-cancel' in query_params:
-    st.title('Payment Cancelled')
-    st.error('Your payment was cancelled. Please try again.')
+    cancel_page()
 
 else:
     # Sélection de la page à afficher
