@@ -52,6 +52,21 @@ def check_credentials(username, password):
 # Chargement initial des utilisateurs au démarrage de l'application
 load_users()
 
+# Page d'accueil
+def home_page():
+    st.title('Home')
+
+    # Vérifier si l'utilisateur est déjà connecté
+    if st.session_state.get('authenticated', False):
+        st.write("Already logged in. Redirecting to main page...")
+        st.experimental_rerun()
+
+    # Boutons pour se connecter ou s'inscrire
+    if st.button('Sign In'):
+        login_page()
+    if st.button('Sign Up'):
+        sign_up_page()
+
 # Page de connexion
 def login_page():
     st.title('Login')
@@ -75,31 +90,6 @@ def main_page():
     if st.button('Logout'):
         st.session_state['authenticated'] = False
         st.experimental_rerun()
-
-    # Ajout d'un formulaire de paiement Stripe
-    st.subheader("Subscribe to our service")
-
-    product_name = "Monthly Subscription"
-    product_price = 10.00  # Prix en USD
-
-    if st.button(f"Pay ${product_price} for {product_name}"):
-        session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {
-                        'name': product_name,
-                    },
-                    'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
-                },
-                'quantity': 1,
-            }],
-            mode='payment',
-            success_url="https://betproject.streamlit.app/success",  # Remplacez par votre URL de succès
-            cancel_url="https://betproject.streamlit.app/cancel",    # Remplacez par votre URL d'annulation
-        )
-        st.markdown(f"[Complete your payment]({session.url})")
 
     # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
     df = pd.read_excel('df.xlsx')
@@ -266,7 +256,6 @@ if 'authenticated' not in st.session_state:
 
 # Affichage de la page de connexion ou d'inscription en fonction de l'état de session
 if not st.session_state['authenticated']:
-    login_page()
-    sign_up_page()  # Ajout de la page d'inscription
+    home_page()
 else:
     main_page()
