@@ -172,10 +172,10 @@ def success_page():
         update_payment_status(username)
         st.session_state['authenticated'] = True
         st.session_state['username'] = username
-        # st.experimental_rerun()
-        st.markdown(f"Redirecting to [main page](http://betproject.streamlit.app)")
+        st.experimental_rerun()
         st.stop()
-        
+        # st.markdown(f"Redirecting to [main page](http://betproject.streamlit.app)")
+
             # Bouton Log Out
     if st.button('Log Out'):
         st.session_state['authenticated'] = False
