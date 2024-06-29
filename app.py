@@ -43,19 +43,8 @@ def create_user(username, password, subscription):
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
     users[username] = {'password': hashed_password, 'authenticated': False, 'subscription': subscription, 'paid': False}
 
-    # Écriture de tous les utilisateurs dans le fichier CSV
-    with open('users.csv', 'w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
-        writer.writeheader()
-        for user, details in users.items():
-            writer.writerow({
-                'Username': user,
-                'Password': details['password'],
-                'Subscription': details['subscription'],
-                'Paid': 'True' if details['paid'] else 'False'
-            })
-
-    return True
+    # Écriture de tous les utilisateurs dans le fichier CSV (dans signup_page())
+    return users
 
 # Vérification des identifiants de connexion
 def check_credentials(username, password):
@@ -103,7 +92,7 @@ def login_page():
 
 # Page principale après connexion
 def main_page(username):
-    st.title('Welcome to Bet Project')
+    st.title(f'Welcome to Bet Project, {username}!')
 
     # Bouton Log Out
     if st.button('Log Out'):
@@ -139,34 +128,36 @@ def signup_page():
     subscription = st.selectbox('Choose a subscription', ['Monthly Subscription', 'Annual Subscription'])
 
     if st.button('Sign Up'):
-        if create_user(username, password, subscription):
-            st.success('Account created successfully. Redirecting to payment...')
-            try:
-                # Créer une session de paiement Stripe
-                product_name = subscription
-                product_price = 10.00 if subscription == 'Monthly Subscription' else 100.00
-
-                session = stripe.checkout.Session.create(
-                    payment_method_types=['card'],
-                    line_items=[{
-                        'price_data': {
-                            'currency': 'usd',
-                            'product_data': {
-                                'name': product_name,
-                            },
-                            'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
-                        },
-                        'quantity': 1,
-                    }],
-                    mode='payment',
-                    success_url=f"https://betproject.streamlit.app?payment-success=1&username={quote(username)}",  # URL de succès du paiement
-                    cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
-                )
-                st.markdown(f"[Complete your payment]({session.url})")
-            except stripe.error.StripeError as e:
-                st.error(f"Stripe error occurred: {e}")
-        else:
+        users = create_user(username, password, subscription)
+        if not users:
             st.error('Username already exists. Please choose another one.')
+            return
+        
+        st.success('Account created successfully. Redirecting to payment...')
+        try:
+            # Créer une session de paiement Stripe
+            product_name = subscription
+            product_price = 10.00 if subscription == 'Monthly Subscription' else 100.00
+
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': product_name,
+                        },
+                        'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=f"https://betproject.streamlit.app?payment-success=1&username={quote(username)}",  # URL de succès du paiement
+                cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
+            )
+            st.markdown(f"[Complete your payment]({session.url})")
+        except stripe.error.StripeError as e:
+            st.error(f"Stripe error occurred: {e}")
 
 # Page d'annulation de paiement
 def cancel_page():
@@ -177,15 +168,6 @@ def cancel_page():
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
     st.session_state['username'] = None
-
-# Détermination de la page actuelle
-query_params = st.experimental_get_query_params()
-if 'payment-success' in query_params:
-    username = query_params.get('username', [None])[0]
-    if username:
-        update_payment_status(username)  # Mise à jour du statut de paiement
-        st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
-        st.session_state['username'] = username  # Mettre à jour l'état du nom d'utilisateur
 
 # Afficher la bonne page en fonction de l'état d'authentification
 if st.session_state['authenticated']:
