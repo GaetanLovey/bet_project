@@ -3,13 +3,13 @@ import pandas as pd
 import stripe
 import csv
 import hashlib
-import urllib.parse  # Import pour l'encodage d'URL
 from data_fetching import load_data, get_sports_list, fetch_and_display_odds
+from urllib.parse import quote  # Importer la fonction quote pour l'encodage d'URL
 
 # Clé API à utiliser pour les appels de données sportives
 API_KEY = '9a58d306f402d400af1cafd8c6152ec9'
 
-# Configuration de Stripe
+# Configuration de Stripe (utilisez votre clé API Stripe appropriée ici)
 stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb"
 
 # Chargement du fichier CSV des utilisateurs au démarrage de l'application
@@ -95,6 +95,9 @@ def login_page():
             st.session_state['authenticated'] = True
             st.session_state['username'] = username
             st.success('Login successful')
+
+            # Actualiser la page pour appliquer les changements d'authentification
+            st.experimental_rerun()
         else:
             st.error('Invalid username or password')
 
@@ -132,11 +135,11 @@ def signup_page():
     if st.button('Sign Up'):
         if create_user(username, password, subscription):
             st.success('Account created successfully. Redirecting to payment...')
-            # Créer une session de paiement Stripe
-            product_name = subscription
-            product_price = 10.00 if subscription == 'Monthly Subscription' else 100.00
-
             try:
+                # Créer une session de paiement Stripe
+                product_name = subscription
+                product_price = 10.00 if subscription == 'Monthly Subscription' else 100.00
+
                 session = stripe.checkout.Session.create(
                     payment_method_types=['card'],
                     line_items=[{
@@ -150,8 +153,8 @@ def signup_page():
                         'quantity': 1,
                     }],
                     mode='payment',
-                    success_url=f"https://betproject.streamlit.app?payment-success=1&username={urllib.parse.quote(username)}",
-                    cancel_url="https://betproject.streamlit.app?payment-cancel=1",
+                    success_url=f"https://betproject.streamlit.app?payment-success=1&username={quote(username)}",  # URL de succès du paiement
+                    cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
                 )
                 st.markdown(f"[Complete your payment]({session.url})")
             except stripe.error.StripeError as e:
@@ -170,7 +173,7 @@ if 'authenticated' not in st.session_state:
     st.session_state['username'] = None
 
 # Détermination de la page actuelle
-query_params = st.query_params()
+query_params = st.experimental_get_query_params()
 if 'payment-success' in query_params:
     username = query_params.get('username', [None])[0]
     if username:
