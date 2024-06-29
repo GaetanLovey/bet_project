@@ -213,79 +213,91 @@ def main_page():
     sport_keys = st.sidebar.multiselect('Choose sports:', sports_list)
     regions = st.sidebar.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
     markets = st.sidebar.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
-    odds_format = st.sidebar.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
-    date_format = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'], index=0)
+    odds_format = st.sidebar.selectbox('Choose odds format:', ['american', 'decimal', 'fractional'], index=1)
+    date_format = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'])
 
-    # Utilisation d'un bouton d'action dans le sidebar pour récupérer les données
-    fetch_button = st.sidebar.button('Fetch')
-
-    # Vérification si le bouton "Fetch" est cliqué
-    if fetch_button:
-        # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
+    # Ajout d'un bouton pour rafraîchir les cotes
+    if st.sidebar.button('Refresh Odds'):
         fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
+
+    # Affichage initial des cotes
+    fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
 
 # Page de création de compte
 def signup_page():
-    st.title('Sign Up')
+    st.title('Create an Account')
 
-    username = st.text_input('Choose a username')
-    password = st.text_input('Choose a password', type='password')
-    subscription = st.selectbox('Choose a subscription', ['Monthly Subscription', 'Annual Subscription'])
+    username = st.text_input('Username')
+    password = st.text_input('Password', type='password')
+    subscription = st.selectbox('Choose Subscription Plan', ['Basic', 'Premium'])
 
     if st.button('Sign Up'):
         if create_user(username, password, subscription):
-            st.success('Account created successfully. Redirecting to payment...')
-            # Créer une session de paiement Stripe
-            product_name = subscription
-            product_price = 10.00 if subscription == 'Monthly Subscription' else 100.00
-
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price_data': {
-                        'currency': 'usd',
-                        'product_data': {
-                            'name': product_name,
-                        },
-                        'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
-                    },
-                    'quantity': 1,
-                }],
-                mode='payment',
-                success_url=f"https://betproject.streamlit.app/success?username={username}",  # Remplacez par votre URL de succès
-                cancel_url="https://betproject.streamlit.app/cancel",    # Remplacez par votre URL d'annulation
-            )
-            st.markdown(f"[Complete your payment]({session.url})")
+            st.success('Account created successfully!')
+            st.session_state['authenticated'] = True
+            st.session_state['username'] = username
+            # Rediriger vers la page principale après l'inscription
+            st.experimental_rerun()
         else:
-            st.error('Username already exists. Please choose another one.')
+            st.error('Username already exists!')
 
-# Page de succès de paiement
-def success_page():
-    main_page()
+# Page de paiement avec Stripe
+def payment_page():
+    st.title('Payment Page')
 
+    # Vérifier si l'utilisateur est connecté
+    if not st.session_state.get('authenticated', False):
+        st.error('You need to be logged in to access this page.')
+        return
 
-# Page d'annulation de paiement
-def cancel_page():
-    st.title('Payment Cancelled')
-    st.error('Your payment was cancelled. Please try again.')
+    # Informations de paiement avec Stripe
+    payment_amount = 1000  # Montant en centimes (10 $)
+    payment_currency = 'usd'
+    payment_description = 'Subscription Payment'
 
-# Gestion des états de l'application
-if 'authenticated' not in st.session_state:
-    st.session_state['authenticated'] = False
+    # Création du bouton de paiement avec Stripe
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': payment_currency,
+                'product_data': {
+                    'name': 'Subscription Plan',
+                },
+                'unit_amount': payment_amount,
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url='http://localhost:8501/success?username=' + st.session_state['username'] + '&success=true',
+        cancel_url='http://localhost:8501/success?username=' + st.session_state['username'] + '&success=false',
+    )
 
-# Détermination de la page actuelle
-query_params = st.experimental_get_query_params()
-if 'success' in query_params:
-    success_page()
-elif 'cancel' in query_params:
-    cancel_page()
-else:
-    # Sélection de la page à afficher
-    if not st.session_state['authenticated']:
-        page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
-        if page == 'Login':
-            login_page()
-        elif page == 'Sign Up':
-            signup_page()
+    st.markdown(f"Redirecting to Stripe for payment...")
+    st.markdown(f"<a href='{session.url}' target='_blank'>Click here to complete your payment.</a>", unsafe_allow_html=True)
+
+# Gestion de la redirection après le paiement réussi
+def handle_success():
+    username = st.session_state['username']
+    success = st.session_state['success']
+
+    if success:
+        st.success(f'Payment successful for user: {username}')
+        st.session_state['authenticated'] = True
+        st.experimental_rerun()
     else:
-        main_page()
+        st.error(f'Payment failed for user: {username}')
+
+# Définition des pages de l'application
+pages = {
+    'Login': login_page,
+    'Signup': signup_page,
+    'Payment': payment_page,
+    'Main': main_page,
+    'Success': handle_success
+}
+
+# Routage des pages
+current_page = st.sidebar.radio('Navigation', list(pages.keys()))
+pages[current_page]()
+
