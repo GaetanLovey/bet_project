@@ -94,6 +94,7 @@ def login_page():
             st.session_state['authenticated'] = True
             st.session_state['username'] = username
             st.success('Login successful')
+            st.session_state.sync()  # Synchroniser les mises à jour de l'état de session
         else:
             st.error('Invalid username or password')
 
