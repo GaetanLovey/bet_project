@@ -252,23 +252,51 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url="https://betproject.streamlit.app/success",  # Remplacez par votre URL de succès
+                success_url=f"https://betproject.streamlit.app/success?username={username}",  # Remplacez par votre URL de succès
                 cancel_url="https://betproject.streamlit.app/cancel",    # Remplacez par votre URL d'annulation
             )
             st.markdown(f"[Complete your payment]({session.url})")
         else:
             st.error('Username already exists. Please choose another one.')
 
+# Page de succès de paiement
+def success_page():
+    st.title('Payment Successful')
+    st.success('Your payment was successful! You are now logged in.')
+
+    # Récupérer le nom d'utilisateur de l'URL
+    query_params = st.experimental_get_query_params()
+    username = query_params.get('username', [None])[0]
+
+    if username:
+        # Authentifier l'utilisateur automatiquement
+        st.session_state['authenticated'] = True
+        st.session_state['username'] = username
+
+    st.experimental_rerun()
+
+# Page d'annulation de paiement
+def cancel_page():
+    st.title('Payment Cancelled')
+    st.error('Your payment was cancelled. Please try again.')
+
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
-# Sélection de la page à afficher
-if not st.session_state['authenticated']:
-    page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
-    if page == 'Login':
-        login_page()
-    elif page == 'Sign Up':
-        signup_page()
+# Détermination de la page actuelle
+query_params = st.experimental_get_query_params()
+if 'success' in query_params:
+    success_page()
+elif 'cancel' in query_params:
+    cancel_page()
 else:
-    main_page()
+    # Sélection de la page à afficher
+    if not st.session_state['authenticated']:
+        page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
+        if page == 'Login':
+            login_page()
+        elif page == 'Sign Up':
+            signup_page()
+    else:
+        main_page()
