@@ -167,11 +167,11 @@ if 'authenticated' not in st.session_state:
 # Détermination de la page actuelle
 query_params = st.experimental_get_query_params()
 if 'payment-success' in query_params:
+    username = st.session_state['username']
+    update_payment_status(username)  # Mise à jour du statut de paiement
     st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
     st.success('Your payment was successful. Your account has been created.')
-    update_payment_status(st.session_state['username'])  # Mise à jour du statut de paiement
-    main_page()  # Afficher la page principale après le succès du paiement
-    st.stop()  # Arrêter l'exécution après la page principale
+    st.experimental_rerun()  # Recharger la page pour appliquer l'état mis à jour
 
 elif 'payment-cancel' in query_params:
     cancel_page()
