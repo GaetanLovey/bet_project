@@ -148,8 +148,8 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url="https://betproject.streamlit.app?payment-success=1&username=" + username,  # URL de succès du paiement
-                cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
+                success_url=f"https://betproject.streamlit.app/?payment-success=1&username={username}",  # URL de succès du paiement
+                cancel_url="https://betproject.streamlit.app/?payment-cancel=1",    # URL d'annulation du paiement
             )
             st.markdown(f"[Complete your payment]({session.url})")
         else:
@@ -171,9 +171,9 @@ if 'payment-success' in query_params:
     username = query_params.get('username', [None])[0]
     if username:
         update_payment_status(username)
-    st.session_state['authenticated'] = True
-    st.session_state['username'] = username
-    st.experimental_rerun()  # Recharger la page pour appliquer l'état d'authentification
+        st.session_state['authenticated'] = True
+        st.session_state['username'] = username
+        st.experimental_rerun()  # Recharger la page pour appliquer l'état d'authentification
 
 elif 'payment-cancel' in query_params:
     cancel_page()
