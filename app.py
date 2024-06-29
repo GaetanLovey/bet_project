@@ -19,10 +19,9 @@ def load_users():
             reader = csv.DictReader(file)
             for row in reader:
                 users[row['Username']] = {
-                    'password': row['Password'],
-                    'authenticated': False,
-                    'subscription': row.get('Subscription', None),
-                    'paid': row.get('Paid', False) == 'True'
+                    'Password': row['Password'],
+                    'Subscription': row.get('Subscription', None),
+                    'Paid': row.get('Paid', False) == 'True'
                 }
     except FileNotFoundError:
         # Créer le fichier users.csv s'il n'existe pas encore
@@ -40,7 +39,7 @@ def create_user(username, password, subscription):
 
     # Hash du mot de passe pour le stockage sécurisé
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    users[username] = {'password': hashed_password, 'authenticated': False, 'subscription': subscription, 'paid': False}
+    users[username] = {'Password': hashed_password, 'Subscription': subscription, 'Paid': False}
 
     # Ajout de l'utilisateur au fichier CSV
     with open('users.csv', 'a', newline='') as file:
@@ -53,7 +52,7 @@ def create_user(username, password, subscription):
 def check_credentials(username, password):
     users = load_users()  # Charger les utilisateurs actuels
     if username in users:
-        hashed_password = users[username]['password']
+        hashed_password = users[username]['Password']
         # Comparaison du mot de passe haché
         if hashed_password == hashlib.sha256(password.encode()).hexdigest():
             return True
@@ -63,13 +62,16 @@ def check_credentials(username, password):
 def update_payment_status(username):
     users = load_users()
     if username in users:
-        users[username]['paid'] = True
+        users[username]['Paid'] = True
         with open('users.csv', 'w', newline='') as file:
             fieldnames = ['Username', 'Password', 'Subscription', 'Paid']
             writer = csv.DictWriter(file, fieldnames=fieldnames)
 
-            writer.writeheader()
-            writer.writerows(users.values())  # Écrire toutes les lignes mises à jour
+            # Écrire l'en-tête uniquement si le fichier est vide
+            if file.tell() == 0:
+                writer.writeheader()
+
+            writer.writerows(users.values())
 
 # Page de connexion
 def login_page():
@@ -115,6 +117,7 @@ def main_page():
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
         st.experimental_rerun()  # Recharger la page pour appliquer l'état de déconnexion
+
 
 # Page de création de compte
 def signup_page():
