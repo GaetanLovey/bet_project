@@ -4,9 +4,6 @@ import requests
 import stripe
 import csv
 import hashlib
-import time
-
-# Importation des fonctions de data_fetching.py
 from data_fetching import load_data, get_sports_list, fetch_and_display_odds
 
 # Clé API à utiliser pour les appels de données sportives
@@ -76,7 +73,8 @@ def update_payment_status(username):
             writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
             writer.writeheader()
             for user, details in users.items():
-                writer.writerow([user, details['password'], details['subscription'], 'True' if details['paid'] else 'False'])
+                writer.writerow({'Username': user, 'Password': details['password'],
+                                 'Subscription': details['subscription'], 'Paid': 'True' if details['paid'] else 'False'})
 
 # Page de connexion
 def login_page():
