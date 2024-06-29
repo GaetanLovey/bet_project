@@ -10,24 +10,21 @@ stripe.api_key = "sk_test_YOUR_SECRET_KEY"  # Remplacez par votre clé secrète 
 users = {}
 
 # Fonction pour créer un nouvel utilisateur
-def create_user(username, password, email):
+def create_user(username, password):
     if username in users:
         return False  # L'utilisateur existe déjà
-    users[username] = {'password': password, 'email': email, 'authenticated': False}
+    users[username] = {'password': password, 'authenticated': False}
     return True
 
-# Fonction de vérification des identifiants
+# Fonction pour vérifier les identifiants
 def check_credentials(username, password):
     if username in users and users[username]['password'] == password:
         users[username]['authenticated'] = True
         return True
     return False
 
-# Affichage de la page de connexion si l'utilisateur n'est pas authentifié
-if 'authenticated' not in st.session_state:
-    st.session_state['authenticated'] = False
-
-if not st.session_state['authenticated']:
+# Page de connexion
+def login_page():
     st.title('Login')
 
     username = st.text_input('Username')
@@ -37,22 +34,12 @@ if not st.session_state['authenticated']:
         if check_credentials(username, password):
             st.session_state['authenticated'] = True
             st.success('Login successful')
-            st.experimental_rerun()  # Recharge la page après une connexion réussie
+            st.experimental_rerun()
         else:
             st.error('Invalid username or password')
 
-    st.title('Sign Up')
-    new_username = st.text_input('New Username')
-    new_password = st.text_input('New Password', type='password')
-    email = st.text_input('Email')
-
-    if st.button('Sign Up'):
-        if create_user(new_username, new_password, email):
-            st.success('Account created successfully. Please log in.')
-        else:
-            st.error('Username already exists. Please choose another.')
-
-else:
+# Page principale après connexion
+def main_page():
     st.title('Interesting games')
 
     # Ajout d'un bouton de déconnexion
@@ -230,3 +217,27 @@ else:
     if fetch_button:
         # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
         fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
+
+# Page d'inscription
+def sign_up_page():
+    st.title('Sign Up')
+
+    new_username = st.text_input('New Username')
+    new_password = st.text_input('New Password', type='password')
+
+    if st.button('Sign Up'):
+        if create_user(new_username, new_password):
+            st.success('Account created successfully! Please log in.')
+        else:
+            st.error('Username already exists. Please choose a different username.')
+
+# Gestion de l'état de session
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
+
+# Affichage de la page de connexion ou d'inscription en fonction de l'état de session
+if not st.session_state['authenticated']:
+    login_page()
+    sign_up_page()  # Ajout de la page d'inscription
+else:
+    main_page()
