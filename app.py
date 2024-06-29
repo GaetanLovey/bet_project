@@ -8,6 +8,7 @@ import hashlib
 # Configuration de Stripe
 stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb"  # Remplacez par votre clé secrète Stripe
 
+
 # Chargement du fichier CSV des utilisateurs au démarrage de l'application
 users = {}
 
@@ -32,13 +33,16 @@ def load_users():
 def create_user(username, password, subscription):
     if username in users:
         return False  # L'utilisateur existe déjà
+
     # Hash du mot de passe pour le stockage sécurisé
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
     users[username] = {'password': hashed_password, 'authenticated': False, 'subscription': subscription}
+
     # Ajout de l'utilisateur au fichier CSV
     with open('users.csv', 'a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([username, hashed_password, subscription])
+
     return True
 
 # Fonction pour vérifier les identifiants
@@ -252,8 +256,8 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url="https://betproject.streamlit.app",  # Redirection vers la page de login après paiement
-                cancel_url="https://betproject.streamlit.app/cancel",    # Remplacez par votre URL d'annulation
+                success_url="https://your-app-url.com/login",  # Redirection vers la page de login après paiement
+                cancel_url="https://your-app-url.com/cancel",    # Redirection en cas d'annulation
             )
             st.markdown(f"[Complete your payment]({session.url})")
         else:
