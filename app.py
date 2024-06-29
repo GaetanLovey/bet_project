@@ -4,7 +4,6 @@ import requests
 import stripe
 import csv
 import hashlib
-import time
 from data_fetching import load_data, get_sports_list, fetch_and_display_odds
 
 # Clé API à utiliser pour les appels de données sportives
@@ -17,19 +16,19 @@ stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBz
 def load_users():
     users = {}
     try:
-        with open('users.csv', 'r') as file:
+        with open('users.csv', 'r', newline='') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 users[row['Username']] = {
                     'password': row['Password'],
-                    'authenticated': False,
                     'subscription': row.get('Subscription', None),
                     'paid': row.get('Paid', False) == 'True'
                 }
     except FileNotFoundError:
         # Créer le fichier users.csv s'il n'existe pas encore
         with open('users.csv', 'w', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
+            fieldnames = ['Username', 'Password', 'Subscription', 'Paid']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
 
     return users
@@ -42,7 +41,7 @@ def create_user(username, password, subscription):
 
     # Hash du mot de passe pour le stockage sécurisé
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    users[username] = {'password': hashed_password, 'authenticated': False, 'subscription': subscription, 'paid': False}
+    users[username] = {'password': hashed_password, 'subscription': subscription, 'paid': False}
 
     # Ajout de l'utilisateur au fichier CSV
     with open('users.csv', 'a', newline='') as file:
@@ -67,11 +66,16 @@ def update_payment_status(username):
     if username in users:
         users[username]['paid'] = True
         with open('users.csv', 'w', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
+            fieldnames = ['Username', 'Password', 'Subscription', 'Paid']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
             for user, details in users.items():
-                writer.writerow([user, details['password'], details['subscription'], 'True' if details['paid'] else 'False'])
-
+                writer.writerow({
+                    'Username': user,
+                    'Password': details['password'],
+                    'Subscription': details['subscription'],
+                    'Paid': 'True' if details['paid'] else 'False'
+                })
 
 # Page de connexion
 def login_page():
