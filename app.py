@@ -174,6 +174,12 @@ def success_page():
         st.session_state['username'] = username
         st.experimental_rerun()
 
+            # Bouton Log Out
+    if st.button('Log Out'):
+        st.session_state['authenticated'] = False
+        st.session_state['username'] = None
+        st.experimental_rerun()
+
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
