@@ -135,19 +135,17 @@ def fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_forma
 # Récupération de la liste des sports disponibles
 sports_list = get_sports_list(API_KEY)
 
-# Utilisation de st.form pour encapsuler les widgets de sélection et le bouton "Fetch"
-with st.form(key='odds_form'):
-    st.write('Choose your options:')
-    sport_keys = st.multiselect('Choose sports:', sports_list)
-    regions = st.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
-    markets = st.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
-    odds_format = st.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
-    date_format = st.selectbox('Choose date format:', ['iso', 'unix'], index=0)
+# Utilisation de st.sidebar pour placer les widgets de sélection dans le sidebar
+sport_keys = st.sidebar.multiselect('Choose sports:', sports_list)
+regions = st.sidebar.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
+markets = st.sidebar.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
+odds_format = st.sidebar.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
+date_format = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'], index=0)
 
-    # Utilisation de form.form_submit_button pour le bouton "Fetch"
-    form_submit_button = st.form_submit_button(label='Fetch')
+# Utilisation d'un bouton d'action dans le sidebar pour récupérer les données
+fetch_button = st.sidebar.button('Fetch')
 
-    # Vérification si le formulaire a été soumis
-    if form_submit_button:
-        # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
-        fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
+# Vérification si le bouton "Fetch" est cliqué
+if fetch_button:
+    # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
+    fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
