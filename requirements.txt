@@ -6,4 +6,3 @@ requests
 ipywidgets
 IPython 
 display
-clear_output
