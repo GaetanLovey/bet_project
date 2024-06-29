@@ -182,35 +182,9 @@ def main_page():
                 st.warning('No data available for the selected criteria.')
         else:
             # Préparation des données pour d'autres sports
-            events = []
-            for event in all_odds:
-                game_id = event['id']
-                commence_time = event['commence_time']
-                home_team = event['home_team']
-                away_team = event['away_team']
-                for bookmaker in event.get('bookmakers', []):
-                    bookmaker_key = bookmaker.get('key')
-                    last_update = bookmaker.get('last_update')
-
-                    for market in bookmaker.get('markets', []):
-                        market_name = market.get('key')
-                        for outcome in market.get('outcomes', []):
-                            events.append({
-                                'Game ID': game_id,
-                                'Commence Time': commence_time,
-                                'Home Team': home_team,
-                                'Away Team': away_team,
-                                'Bookmaker': bookmaker_key,
-                                'Market': market_name,
-                                'Outcome': outcome.get('name'),
-                                'Odd': outcome.get('price'),
-                                'Last Update': last_update
-                            })
-
-            if events:
-                st.write(pd.DataFrame(events))
-            else:
-                st.warning('No data available for the selected criteria.')
+            st.write("Other odds :")
+            for sport in all_odds:
+                st.write(sport)
 
     # Récupération de la liste des sports disponibles
     sports_list = get_sports_list(API_KEY)
