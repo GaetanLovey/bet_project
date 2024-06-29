@@ -96,8 +96,8 @@ def main_page():
                 'quantity': 1,
             }],
             mode='payment',
-            success_url="https://your-success-url.com",  # Remplacez par votre URL de succès
-            cancel_url="https://your-cancel-url.com",    # Remplacez par votre URL d'annulation
+            success_url="https://yourdomain.com/success",  # Remplacez par votre URL de succès
+            cancel_url="https://yourdomain.com/cancel",    # Remplacez par votre URL d'annulation
         )
         st.markdown(f"[Complete your payment]({session.url})")
 
