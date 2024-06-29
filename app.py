@@ -12,7 +12,11 @@ passwords = ["password"]  # Remplacez par des mots de passe sécurisés
 hashed_passwords = stauth.Hasher(passwords).generate()
 
 # Création de l'objet d'authentification
-authenticator = stauth.Authenticate(names, usernames, hashed_passwords, 'cookie_name', 'signature_key', cookie_expiry_days=1)
+authenticator = stauth.Authenticate(
+    names, usernames, hashed_passwords,
+    'some_cookie_name', 'some_signature_key',
+    cookie_expiry_days=1
+)
 
 # Authentification de l'utilisateur
 name, authentication_status, username = authenticator.login('Login', 'main')
