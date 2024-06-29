@@ -29,6 +29,11 @@ if not st.session_state['authenticated']:
 else:
     st.title('Interesting games')
 
+    # Ajout d'un bouton de déconnexion
+    if st.button('Logout'):
+        st.session_state['authenticated'] = False
+        st.experimental_rerun()
+
     # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
     df = pd.read_excel('df.xlsx')
 
