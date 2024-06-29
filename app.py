@@ -87,7 +87,6 @@ def main_page():
     if st.button('Logout'):
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
-        st.session_state.sync()  # Synchroniser l'état de session
         st.experimental_rerun()  # Recharger la page pour appliquer l'état de déconnexion
 
     # Utilisation des fonctions importées pour charger et afficher les données
