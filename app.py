@@ -1,3 +1,5 @@
+# app.py
+
 import streamlit as st
 import pandas as pd
 import requests
@@ -5,6 +7,10 @@ import stripe
 import csv
 import hashlib
 import time
+from data_fetching import load_data, get_sports_list, fetch_and_display_odds
+
+# Clé API à utiliser pour les appels de données sportives
+API_KEY = '9a58d306f402d400af1cafd8c6152ec9'
 
 # Configuration de Stripe
 stripe.api_key = "sk_test_51PX1EnRpFgwyVO1as56l9TxhvladEkMOQ0nUHhj1ZKV0qnd8RcDBzrjK2Dx2zFzKNFM2ytTqGCFXYbhwHYsJroIn00JMlO6Cmb"
@@ -84,107 +90,10 @@ def main_page():
         st.session_state.sync()  # Synchroniser l'état de session
         st.experimental_rerun()  # Recharger la page pour appliquer l'état de déconnexion
 
-    # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
-    df = pd.read_excel('df.xlsx')
-
-    # Affichage du DataFrame initial
+    # Utilisation des fonctions importées pour charger et afficher les données
+    df = load_data()
     st.write("Bookmaker above average :")
     st.dataframe(df)
-
-    # Variables pour les URL de l'API et la clé API (remplacez par vos valeurs réelles)
-    API_KEY = '9a58d306f402d400af1cafd8c6152ec9'
-    SPORTS_URL = 'https://api.the-odds-api.com/v4/sports'
-    ODDS_URL = 'https://api.the-odds-api.com/v4/sports/{sport}/odds'
-
-    # Fonction pour récupérer la liste des sports disponibles depuis l'API
-    def get_sports_list(api_key):
-        params = {'api_key': api_key}
-        response = requests.get(SPORTS_URL, params=params)
-        if response.status_code == 200:
-            sports_data = response.json()
-            sports_list = [sport['key'] for sport in sports_data]
-            return sports_list
-        else:
-            st.error(f'Failed to fetch sports list: status_code {response.status_code}, response body {response.text}')
-            return []
-
-    # Fonction pour récupérer et afficher les cotes en fonction des paramètres sélectionnés
-    def fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format):
-        params = {
-            'api_key': API_KEY,
-            'regions': ','.join(regions),
-            'markets': markets,
-            'oddsFormat': odds_format,
-            'dateFormat': date_format,
-        }
-
-        all_odds = []
-        for sport_key in sport_keys:
-            url = ODDS_URL.format(sport=sport_key)
-            response = requests.get(url, params=params)
-            if response.status_code == 200:
-                odds_json = response.json()
-                all_odds.extend(odds_json)
-                st.success(f'Sport: {sport_key}, Number of events: {len(odds_json)}')
-                st.info(f'Remaining requests: {response.headers.get("x-requests-remaining")}')
-                st.info(f'Used requests: {response.headers.get("x-requests-used")}')
-            else:
-                st.error(f'Failed to fetch odds for {sport_key}: status_code {response.status_code}, response body {response.text}')
-
-        # Affichage des données récupérées sous forme de DataFrame ou autre visualisation
-        if any(sport.startswith('soccer') for sport in sport_keys) and 'h2h' in markets:
-            # Préparation des données pour les matchs de football avec le marché "h2h"
-            events = []
-            for event in all_odds:
-                event_id = event['id']
-                sport_key = event['sport_key']
-                sport_title = event['sport_title']
-                commence_time = event['commence_time']
-                home_team = event['home_team']
-                away_team = event['away_team']
-
-                for bookmaker in event['bookmakers']:
-                    bookmaker_key = bookmaker['key']
-                    bookmaker_title = bookmaker['title']
-                    win_odd = draw_odd = lose_odd = None
-
-                    for market in bookmaker['markets']:
-                        if market['key'] == 'h2h':
-                            for outcome in market['outcomes']:
-                                if outcome['name'] == home_team:
-                                    win_odd = outcome['price']
-                                elif outcome['name'] == away_team:
-                                    lose_odd = outcome['price']
-                                elif outcome['name'] == 'Draw':
-                                    draw_odd = outcome['price']
-
-                    # Ajouter l'événement uniquement s'il n'existe pas déjà dans events
-                    if (event_id, bookmaker_key) not in [(e['Event ID'], e['Bookmaker Key']) for e in events]:
-                        events.append({
-                            'Event ID': event_id,
-                            'Sport Key': sport_key,
-                            'Sport Title': sport_title,
-                            'Commence Time': commence_time,
-                            'Home Team': home_team,
-                            'Away Team': away_team,
-                            'Bookmaker Key': bookmaker_key,
-                            'Bookmaker Title': bookmaker_title,
-                            'Win Odd': win_odd,
-                            'Draw Odd': draw_odd,
-                            'Lose Odd': lose_odd
-                        })
-
-            columns = ['Event ID', 'Sport Key', 'Sport Title', 'Commence Time', 'Home Team', 'Away Team',
-                       'Bookmaker Key', 'Bookmaker Title', 'Win Odd', 'Draw Odd', 'Lose Odd']
-            if events:
-                st.write(pd.DataFrame(events, columns=columns))
-            else:
-                st.warning('No data available for the selected criteria.')
-        else:
-            # Préparation des données pour d'autres sports
-            st.write("Other odds :")
-            for sport in all_odds:
-                st.write(sport)
 
     # Récupération de la liste des sports disponibles
     sports_list = get_sports_list(API_KEY)
@@ -196,78 +105,16 @@ def main_page():
     odds_format = st.sidebar.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
     date_format = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'], index=0)
 
-    # Utilisation d'un bouton d'action dans le sidebar pour récupérer les données
-    fetch_button = st.sidebar.button('Fetch')
+    # Appel de la fonction pour récupérer et afficher les cotes
+    fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
 
-    # Vérification si le bouton "Fetch" est cliqué
-    if fetch_button:
-        # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
-        fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
-
-# Page de création de compte
-def signup_page():
-    st.title('Sign Up')
-
-    username = st.text_input('Choose a username')
-    password = st.text_input('Choose a password', type='password')
-    subscription = st.selectbox('Choose a subscription', ['Monthly Subscription', 'Annual Subscription'])
-
-    if st.button('Sign Up'):
-        if create_user(username, password, subscription):
-            st.success('Account created successfully. Redirecting to payment...')
-            # Créer une session de paiement Stripe
-            product_name = subscription
-            product_price = 10.00 if subscription == 'Monthly Subscription' else 100.00
-
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price_data': {
-                        'currency': 'usd',
-                        'product_data': {
-                            'name': product_name,
-                        },
-                        'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
-                    },
-                    'quantity': 1,
-                }],
-                mode='payment',
-                success_url="https://betproject.streamlit.app?payment-success=1",  # URL de succès du paiement
-                cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
-            )
-            st.markdown(f"[Complete your payment]({session.url})")
-        else:
-            st.error('Username already exists. Please choose another one.')
-
-# Page d'annulation de paiement
-def cancel_page():
-    st.title('Payment Cancelled')
-    st.error('Your payment was cancelled. Please try again.')
-
-# Gestion des états de l'application
+# Gestion des états d'authentification
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
+if 'username' not in st.session_state:
     st.session_state['username'] = None
 
-# Détermination de la page actuelle
-query_params = st.experimental_get_query_params()
-if 'payment-success' in query_params:
-    main_page()  # Afficher la page principale après le succès du paiement
-    st.success('Your payment was successful. Your account has been created.')
-    time.sleep(2)  # Attente pour s'assurer que l'état est mis à jour dans le fichier CSV
-    st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
-    st.stop()  # Arrêter l'exécution après la page principale
-
-elif 'payment-cancel' in query_params:
-    cancel_page()
-
+if st.session_state['authenticated']:
+    main_page()
 else:
-    # Sélection de la page à afficher
-    if not st.session_state['authenticated']:
-        page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
-        if page == 'Login':
-            login_page()
-        elif page == 'Sign Up':
-            signup_page()
-    else:
-        main_page()
+    login_page()
