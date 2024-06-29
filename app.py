@@ -1,13 +1,8 @@
 import streamlit as st
-import pandas as pd
 import stripe
 
 # Configuration de Stripe
 stripe.api_key = "sk_test_YOUR_SECRET_KEY"  # Remplacez par votre clé secrète Stripe
-
-# Configuration de la connexion (modifiez ces valeurs)
-USERNAME = "user"
-PASSWORD = "password"
 
 # Liste de tous les utilisateurs enregistrés (simulé ici pour un exemple)
 registered_users = {
