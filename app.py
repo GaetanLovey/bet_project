@@ -52,21 +52,6 @@ def check_credentials(username, password):
 # Chargement initial des utilisateurs au démarrage de l'application
 load_users()
 
-# Page d'accueil
-def home_page():
-    st.title('Home')
-
-    # Vérifier si l'utilisateur est déjà connecté
-    if st.session_state.get('authenticated', False):
-        st.write("Already logged in. Redirecting to main page...")
-        st.experimental_rerun()
-
-    # Boutons pour se connecter ou s'inscrire
-    if st.button('Sign In'):
-        login_page()
-    if st.button('Sign Up'):
-        sign_up_page()
-
 # Page de connexion
 def login_page():
     st.title('Login')
@@ -234,28 +219,31 @@ def main_page():
 
     # Vérification si le bouton "Fetch" est cliqué
     if fetch_button:
-        # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
         fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
 
-# Page d'inscription
-def sign_up_page():
+# Page de création de compte
+def signup_page():
     st.title('Sign Up')
 
-    new_username = st.text_input('New Username')
-    new_password = st.text_input('New Password', type='password')
+    username = st.text_input('Choose a username')
+    password = st.text_input('Choose a password', type='password')
 
     if st.button('Sign Up'):
-        if create_user(new_username, new_password):
-            st.success('Account created successfully! Please log in.')
+        if create_user(username, password):
+            st.success('Account created successfully. Please log in.')
         else:
-            st.error('Username already exists. Please choose a different username.')
+            st.error('Username already exists. Please choose another one.')
 
-# Gestion de l'état de session
+# Gestion des états de l'application
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
-# Affichage de la page de connexion ou d'inscription en fonction de l'état de session
+# Sélection de la page à afficher
 if not st.session_state['authenticated']:
-    home_page()
+    page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
+    if page == 'Login':
+        login_page()
+    elif page == 'Sign Up':
+        signup_page()
 else:
     main_page()
