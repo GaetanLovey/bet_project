@@ -4,12 +4,12 @@ import requests
 
 st.title('Interesting games')
 
-# Lecture du DataFrame à partir d'un fichier Excel local
+# Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
 df = pd.read_excel('df.xlsx')
 
-# Affichage du DataFrame
+# Affichage du DataFrame initial
 st.write("Bookmaker above average :")
-st.dataframe(df)  # Utilisation de st.table(df) pour un affichage statique si nécessaire
+st.dataframe(df)
 
 # Variables pour les URL de l'API et la clé API (remplacez par vos valeurs réelles)
 API_KEY = '9a58d306f402d400af1cafd8c6152ec9'
@@ -29,15 +29,7 @@ def get_sports_list(api_key):
         return []
 
 # Fonction pour récupérer et afficher les cotes en fonction des paramètres sélectionnés
-def fetch_and_display_odds():
-    sports_list = get_sports_list(API_KEY)
-    
-    sport_keys = st.sidebar.multiselect('Choose sports:', sports_list)
-    regions = st.sidebar.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
-    markets = st.sidebar.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
-    odds_format = st.sidebar.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
-    date_format = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'], index=0)
-
+def fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format):
     params = {
         'api_key': API_KEY,
         'regions': ','.join(regions),
@@ -143,9 +135,19 @@ def fetch_and_display_odds():
 # Récupération de la liste des sports disponibles
 sports_list = get_sports_list(API_KEY)
 
-# Affichage des widgets dans l'interface Streamlit
-fetch_button = st.button('Fetch')
+# Utilisation de st.form pour encapsuler les widgets de sélection et le bouton "Fetch"
+with st.form(key='odds_form'):
+    st.write('Choose your options:')
+    sport_keys = st.multiselect('Choose sports:', sports_list)
+    regions = st.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
+    markets = st.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
+    odds_format = st.selectbox('Choose odds format:', ['decimal', 'american'], index=0)
+    date_format = st.selectbox('Choose date format:', ['iso', 'unix'], index=0)
 
-# Gestion de l'événement de clic du bouton
-if fetch_button:
-    fetch_and_display_odds()
+    # Utilisation de form.form_submit_button pour le bouton "Fetch"
+    form_submit_button = st.form_submit_button(label='Fetch')
+
+    # Vérification si le formulaire a été soumis
+    if form_submit_button:
+        # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
+        fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
