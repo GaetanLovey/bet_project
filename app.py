@@ -4,16 +4,20 @@ import requests
 import streamlit_authenticator as stauth
 
 # Configuration de l'authentification
-names = ["Gaëtan"]
-usernames = ["glovey"]
-passwords = ["1234"]  # Remplacez par des mots de passe sécurisés
+names = ["Nom d'utilisateur"]
+usernames = ["nom_utilisateur"]
+passwords = ["mot_de_passe"]  # Remplacez par des mots de passe sécurisés
 
+# Hachage des mots de passe
 hashed_passwords = stauth.Hasher(passwords).generate()
 
+# Création de l'objet d'authentification
 authenticator = stauth.Authenticate(names, usernames, hashed_passwords, 'some_cookie_name', 'some_signature_key', cookie_expiry_days=1)
 
+# Authentification de l'utilisateur
 name, authentication_status, username = authenticator.login('Login', 'main')
 
+# Vérification de l'état d'authentification
 if authentication_status:
     st.title('Interesting games')
 
@@ -162,6 +166,7 @@ if authentication_status:
     if fetch_button:
         # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
         fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
+
 elif authentication_status == False:
     st.error('Username or password is incorrect')
 elif authentication_status == None:
