@@ -26,7 +26,7 @@ def load_users():
                     'password': row['Password'],
                     'authenticated': False,
                     'subscription': row.get('Subscription', None),
-                    'paid': row.get('Paid', False) == 'True'
+                    'paid': row.get('Paid', 'False') == 'True'
                 }
     except FileNotFoundError:
         # Créer le fichier users.csv s'il n'existe pas encore
@@ -53,15 +53,30 @@ def create_user(username, password, subscription):
 
     return True
 
-# Vérification des identifiants de connexion
+# Vérification des identifiants de connexion et de l'état de paiement
 def check_credentials(username, password):
     users = load_users()  # Charger les utilisateurs actuels
     if username in users:
         hashed_password = users[username]['password']
         # Comparaison du mot de passe haché
         if hashed_password == hashlib.sha256(password.encode()).hexdigest():
-            return True
+            if users[username]['paid']:
+                return True
+            else:
+                st.warning('Payment not completed. Please complete the payment to log in.')
+                return False
     return False
+
+# Mise à jour de l'état de paiement dans le fichier CSV
+def update_payment_status(username):
+    users = load_users()
+    if username in users:
+        users[username]['paid'] = True
+        with open('users.csv', 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
+            writer.writeheader()
+            for user, details in users.items():
+                writer.writerow([user, details['password'], details['subscription'], 'True' if details['paid'] else 'False'])
 
 # Page de connexion
 def login_page():
@@ -136,7 +151,7 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url="https://betproject.streamlit.app?payment-success=1",  # URL de succès du paiement
+                success_url="https://betproject.streamlit.app?payment-success=1&username=" + username,  # URL de succès du paiement
                 cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
             )
             st.markdown(f"[Complete your payment]({session.url})")
@@ -156,11 +171,12 @@ if 'authenticated' not in st.session_state:
 # Détermination de la page actuelle
 query_params = st.experimental_get_query_params()
 if 'payment-success' in query_params:
-    main_page()  # Afficher la page principale après le succès du paiement
-    st.success('Your payment was successful. Your account has been created.')
-    time.sleep(2)  # Attente pour s'assurer que l'état est mis à jour dans le fichier CSV
-    st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
-    st.stop()  # Arrêter l'exécution après la page principale
+    username = query_params.get('username', [None])[0]
+    if username:
+        update_payment_status(username)
+    st.session_state['authenticated'] = True
+    st.session_state['username'] = username
+    st.experimental_rerun()  # Recharger la page pour appliquer l'état d'authentification
 
 elif 'payment-cancel' in query_params:
     cancel_page()
