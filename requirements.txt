@@ -4,4 +4,6 @@ altair
 openpyxl
 requests
 ipywidgets
-IPython.display 
+IPython 
+display
+clear_output
