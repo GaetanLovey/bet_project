@@ -1,3 +1,5 @@
+# app.py
+
 import streamlit as st
 import pandas as pd
 import requests
@@ -70,12 +72,7 @@ def update_payment_status(username):
             writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
             writer.writeheader()
             for user, details in users.items():
-                writer.writerow({
-                    'Username': user,
-                    'Password': details['password'],
-                    'Subscription': details['subscription'],
-                    'Paid': 'True' if details['paid'] else 'False'
-                })
+                writer.writerow([user, details['password'], details['subscription'], 'True' if details['paid'] else 'False'])
 
 # Page de connexion
 def login_page():
@@ -150,7 +147,7 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=f"https://betproject.streamlit.app?payment-success=1&username={username}",  # URL de succès du paiement
+                success_url="https://betproject.streamlit.app?payment-success=1",  # URL de succès du paiement
                 cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
             )
             st.markdown(f"[Complete your payment]({session.url})")
@@ -170,13 +167,11 @@ if 'authenticated' not in st.session_state:
 # Détermination de la page actuelle
 query_params = st.experimental_get_query_params()
 if 'payment-success' in query_params:
-    username = query_params.get('username', [None])[0]
-    if username:
-        update_payment_status(username)  # Mise à jour du statut de paiement
-        st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
-        st.session_state['username'] = username  # Mettre à jour l'état du nom d'utilisateur
-        st.success('Your payment was successful. Your account has been created.')
-        st.experimental_rerun()  # Recharger la page pour appliquer l'état mis à jour
+    st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
+    st.success('Your payment was successful. Your account has been created.')
+    update_payment_status(st.session_state['username'])  # Mise à jour du statut de paiement
+    main_page()  # Afficher la page principale après le succès du paiement
+    st.stop()  # Arrêter l'exécution après la page principale
 
 elif 'payment-cancel' in query_params:
     cancel_page()
