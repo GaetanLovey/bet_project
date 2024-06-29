@@ -1,5 +1,3 @@
-# app.py
-
 import streamlit as st
 import pandas as pd
 import requests
@@ -147,7 +145,7 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url="https://betproject.streamlit.app?payment-success=1",  # URL de succès du paiement
+                success_url=f"https://betproject.streamlit.app?payment-success=1&username={username}",  # URL de succès du paiement
                 cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
             )
             st.markdown(f"[Complete your payment]({session.url})")
@@ -167,11 +165,13 @@ if 'authenticated' not in st.session_state:
 # Détermination de la page actuelle
 query_params = st.experimental_get_query_params()
 if 'payment-success' in query_params:
-    username = st.session_state['username']
-    update_payment_status(username)  # Mise à jour du statut de paiement
-    st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
-    st.success('Your payment was successful. Your account has been created.')
-    st.experimental_rerun()  # Recharger la page pour appliquer l'état mis à jour
+    username = query_params.get('username', [None])[0]
+    if username:
+        update_payment_status(username)  # Mise à jour du statut de paiement
+        st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
+        st.session_state['username'] = username  # Mettre à jour l'état du nom d'utilisateur
+        st.success('Your payment was successful. Your account has been created.')
+        st.experimental_rerun()  # Recharger la page pour appliquer l'état mis à jour
 
 elif 'payment-cancel' in query_params:
     cancel_page()
