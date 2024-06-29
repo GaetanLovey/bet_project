@@ -6,7 +6,7 @@ import stripe
 # Configuration de Stripe
 stripe.api_key = "sk_test_YOUR_SECRET_KEY"  # Remplacez par votre clé secrète Stripe
 
-# Structure de données pour stocker les utilisateurs (simulant une base de données)
+# Structure de données pour stocker les utilisateurs
 users = {}
 
 # Fonction pour créer un nouvel utilisateur
@@ -18,7 +18,10 @@ def create_user(username, password, email):
 
 # Fonction de vérification des identifiants
 def check_credentials(username, password):
-    return username in users and users[username]['password'] == password
+    if username in users and users[username]['password'] == password:
+        users[username]['authenticated'] = True
+        return True
+    return False
 
 # Affichage de la page de connexion si l'utilisateur n'est pas authentifié
 if 'authenticated' not in st.session_state:
