@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 import requests
+import stripe
+
+# Configuration de Stripe
+stripe.api_key = "sk_test_YOUR_SECRET_KEY"  # Remplacez par votre clé secrète Stripe
 
 # Configuration de la connexion (modifiez ces valeurs)
 USERNAME = "user"
@@ -35,6 +39,30 @@ else:
         st.session_state['authenticated'] = False
         st.experimental_rerun()
 
+    # Ajout d'un formulaire de paiement Stripe
+    st.subheader("Subscribe to our service")
+
+    product_name = "Monthly Subscription"
+    product_price = 10.00  # Prix en USD
+
+    if st.button(f"Pay ${product_price} for {product_name}"):
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': product_name,
+                    },
+                    'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url="https://your-success-url.com",
+            cancel_url="https://your-cancel-url.com",
+        )
+        st.markdown(f"[Complete your payment]({session.url})")
     # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
     df = pd.read_excel('df.xlsx')
 
