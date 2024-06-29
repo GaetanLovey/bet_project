@@ -8,4 +8,3 @@ IPython
 display
 streamlit-authenticator
 stripe
-csv
