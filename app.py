@@ -1,8 +1,12 @@
+# app.py
+
 import streamlit as st
 import pandas as pd
+import requests
 import stripe
 import csv
 import hashlib
+import time
 from data_fetching import load_data, get_sports_list, fetch_and_display_odds
 
 # Clé API à utiliser pour les appels de données sportives
@@ -22,7 +26,7 @@ def load_users():
                     'password': row['Password'],
                     'authenticated': False,
                     'subscription': row.get('Subscription', None),
-                    'paid': row.get('Paid', 'False') == 'True'
+                    'paid': row.get('Paid', False) == 'True'
                 }
     except FileNotFoundError:
         # Créer le fichier users.csv s'il n'existe pas encore
@@ -49,31 +53,15 @@ def create_user(username, password, subscription):
 
     return True
 
-# Vérification des identifiants de connexion et de l'état de paiement
+# Vérification des identifiants de connexion
 def check_credentials(username, password):
     users = load_users()  # Charger les utilisateurs actuels
     if username in users:
         hashed_password = users[username]['password']
         # Comparaison du mot de passe haché
         if hashed_password == hashlib.sha256(password.encode()).hexdigest():
-            if users[username]['paid']:
-                return True
-            else:
-                st.warning('Payment not completed. Please complete the payment to log in.')
-                return False
+            return True
     return False
-
-# Mise à jour de l'état de paiement dans le fichier CSV
-def update_payment_status(username):
-    users = load_users()
-    if username in users:
-        users[username]['paid'] = True
-        with open('users.csv', 'w', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
-            writer.writeheader()
-            for user, details in users.items():
-                writer.writerow({'Username': user, 'Password': details['password'],
-                                 'Subscription': details['subscription'], 'Paid': 'True' if details['paid'] else 'False'})
 
 # Page de connexion
 def login_page():
@@ -99,6 +87,7 @@ def main_page():
     if st.button('Logout'):
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
+        st.session_state.sync()  # Synchroniser l'état de session
         st.experimental_rerun()  # Recharger la page pour appliquer l'état de déconnexion
 
     # Utilisation des fonctions importées pour charger et afficher les données
@@ -117,74 +106,15 @@ def main_page():
     date_format = st.sidebar.selectbox('Choose date format:', ['iso', 'unix'], index=0)
 
     # Appel de la fonction pour récupérer et afficher les cotes
-    if st.sidebar.button('Fetch'):
-        fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
+    fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
 
-# Page de création de compte
-def signup_page():
-    st.title('Sign Up')
-
-    username = st.text_input('Choose a username')
-    password = st.text_input('Choose a password', type='password')
-    subscription = st.selectbox('Choose a subscription', ['Monthly Subscription', 'Annual Subscription'])
-
-    if st.button('Sign Up'):
-        if create_user(username, password, subscription):
-            st.success('Account created successfully. Redirecting to payment...')
-            # Créer une session de paiement Stripe
-            product_name = subscription
-            product_price = 10.00 if subscription == 'Monthly Subscription' else 100.00
-
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price_data': {
-                        'currency': 'usd',
-                        'product_data': {
-                            'name': product_name,
-                        },
-                        'unit_amount': int(product_price * 100),  # Stripe traite les montants en cents
-                    },
-                    'quantity': 1,
-                }],
-                mode='payment',
-                success_url=f"https://betproject.streamlit.app/?payment-success=1&username={username}",  # URL de succès du paiement
-                cancel_url="https://betproject.streamlit.app/?payment-cancel=1",    # URL d'annulation du paiement
-            )
-            st.markdown(f"[Complete your payment]({session.url})")
-        else:
-            st.error('Username already exists. Please choose another one.')
-
-# Page d'annulation de paiement
-def cancel_page():
-    st.title('Payment Cancelled')
-    st.error('Your payment was cancelled. Please try again.')
-
-# Gestion des états de l'application
+# Gestion des états d'authentification
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
+if 'username' not in st.session_state:
     st.session_state['username'] = None
 
-# Détermination de la page actuelle
-query_params = st.experimental_get_query_params()
-if 'payment-success' in query_params:
-    username = query_params.get('username', [None])[0]
-    if username:
-        update_payment_status(username)
-        st.session_state['authenticated'] = True
-        st.session_state['username'] = username
-        st.experimental_rerun()  # Recharger la page pour appliquer l'état d'authentification
-
-elif 'payment-cancel' in query_params:
-    cancel_page()
-
+if st.session_state['authenticated']:
+    main_page()
 else:
-    # Sélection de la page à afficher
-    if not st.session_state['authenticated']:
-        page = st.sidebar.selectbox('Choose a page', ['Login', 'Sign Up'])
-        if page == 'Login':
-            login_page()
-        elif page == 'Sign Up':
-            signup_page()
-    else:
-        main_page()
+    login_page()
