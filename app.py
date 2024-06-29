@@ -70,13 +70,8 @@ def update_payment_status(username):
             writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
             writer.writeheader()
             for user, details in users.items():
-                writer.writerow({'Username': user, 'Password': details['password'], 'Subscription': details['subscription'], 'Paid': 'True' if details['paid'] else 'False'})
+                writer.writerow([user, details['password'], details['subscription'], 'True' if details['paid'] else 'False'])
 
-# Fonction de déconnexion
-def logout():
-    st.session_state['authenticated'] = False
-    st.session_state['username'] = None
-    st.experimental_rerun()  # Recharger la page pour appliquer l'état de déconnexion
 
 # Page de connexion
 def login_page():
@@ -98,10 +93,6 @@ def login_page():
 def main_page():
     st.title('Interesting games')
 
-    # Ajout d'un bouton de déconnexion
-    if st.button('Logout'):
-        logout()
-
     # Utilisation des fonctions importées pour charger et afficher les données
     df = load_data()
     st.write("Bookmaker above average :")
@@ -120,6 +111,14 @@ def main_page():
     # Appel de la fonction pour récupérer et afficher les cotes
     if st.sidebar.button('Fetch'):
         fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
+
+    # Bouton de déconnexion
+    if st.button('Logout'):
+        st.session_state['authenticated'] = False
+        st.session_state['username'] = None
+        st.session_state['password'] = None  # Réinitialisation du mot de passe à None
+        st.experimental_rerun()  # Recharger la page pour appliquer l'état de déconnexion
+
 
 # Page de création de compte
 def signup_page():
