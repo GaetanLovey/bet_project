@@ -63,6 +63,17 @@ def check_credentials(username, password):
             return True
     return False
 
+# Mise à jour de l'état de paiement dans le fichier CSV
+def update_payment_status(username):
+    users = load_users()
+    if username in users:
+        users[username]['paid'] = True
+        with open('users.csv', 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
+            writer.writeheader()
+            for user, details in users.items():
+                writer.writerow([user, details['password'], details['subscription'], 'True' if details['paid'] else 'False'])
+
 # Page de connexion
 def login_page():
     st.title('Login')
@@ -156,10 +167,10 @@ if 'authenticated' not in st.session_state:
 # Détermination de la page actuelle
 query_params = st.experimental_get_query_params()
 if 'payment-success' in query_params:
-    main_page()  # Afficher la page principale après le succès du paiement
-    st.success('Your payment was successful. Your account has been created.')
-    time.sleep(2)  # Attente pour s'assurer que l'état est mis à jour dans le fichier CSV
     st.session_state['authenticated'] = True  # Mettre à jour l'état d'authentification de l'utilisateur
+    st.success('Your payment was successful. Your account has been created.')
+    update_payment_status(st.session_state['username'])  # Mise à jour du statut de paiement
+    main_page()  # Afficher la page principale après le succès du paiement
     st.stop()  # Arrêter l'exécution après la page principale
 
 elif 'payment-cancel' in query_params:
