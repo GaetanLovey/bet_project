@@ -98,6 +98,7 @@ def main_page(username):
     if st.button('Log Out'):
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
+        st.experimental_rerun()
 
     # Utilisation des fonctions importées pour charger et afficher les données
     df = load_data()
@@ -151,11 +152,11 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=f"https://betproject.streamlit.app/?payment-success=1&username={quote(username)}",  # URL de succès du paiement
-                cancel_url="https://betproject.streamlit.app/?payment-cancel=1",    # URL d'annulation du paiement
+                
+                success_url=f"https://betproject.streamlit.app?payment-success=1&username={quote(username)}",  # URL de succès du paiement
+                cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
             )
-            st.markdown(f"Redirecting to payment... Please wait.")
-            st.markdown(f'<script>setTimeout(function() {{window.location.href="{session.url}"}}, 3000);</script>', unsafe_allow_html=True)
+            st.markdown(f"[Complete your payment]({session.url})")
         except stripe.error.StripeError as e:
             st.error(f"Stripe error occurred: {e}")
 
@@ -171,6 +172,7 @@ def success_page():
         update_payment_status(username)
         st.session_state['authenticated'] = True
         st.session_state['username'] = username
+        # st.experimental_rerun()
 
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
