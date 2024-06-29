@@ -1,28 +1,32 @@
 import streamlit as st
 import pandas as pd
 import requests
-import streamlit_authenticator as stauth
 
-# Configuration de l'authentification
-names = ["User"]
-usernames = ["user"]
-passwords = ["password"]  # Remplacez par des mots de passe sécurisés
+# Configuration de la connexion (modifiez ces valeurs)
+USERNAME = "user"
+PASSWORD = "password"
 
-# Hachage des mots de passe
-hashed_passwords = stauth.Hasher(passwords).generate()
+# Fonction de vérification des identifiants
+def check_credentials(username, password):
+    return username == USERNAME and password == PASSWORD
 
-# Création de l'objet d'authentification
-authenticator = stauth.Authenticate(
-    names, usernames, hashed_passwords,
-    'some_cookie_name', 'some_signature_key',
-    cookie_expiry_days=1
-)
+# Affichage de la page de connexion si l'utilisateur n'est pas authentifié
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
 
-# Authentification de l'utilisateur
-name, authentication_status, username = authenticator.login('Login', 'main')
+if not st.session_state['authenticated']:
+    st.title('Login')
 
-# Vérification de l'état d'authentification
-if authentication_status:
+    username = st.text_input('Username')
+    password = st.text_input('Password', type='password')
+
+    if st.button('Login'):
+        if check_credentials(username, password):
+            st.session_state['authenticated'] = True
+            st.success('Login successful')
+        else:
+            st.error('Invalid username or password')
+else:
     st.title('Interesting games')
 
     # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
@@ -63,7 +67,7 @@ if authentication_status:
         for sport_key in sport_keys:
             url = ODDS_URL.format(sport=sport_key)
             response = requests.get(url, params=params)
-            if response.status_code == 200:
+            if response.status_code == 200):
                 odds_json = response.json()
                 all_odds.extend(odds_json)
                 st.success(f'Sport: {sport_key}, Number of events: {len(odds_json)}')
@@ -170,8 +174,3 @@ if authentication_status:
     if fetch_button:
         # Appel de la fonction fetch_and_display_odds avec les paramètres sélectionnés
         fetch_and_display_odds(sport_keys, regions, markets, odds_format, date_format)
-
-elif authentication_status == False:
-    st.error('Username or password is incorrect')
-elif authentication_status == None:
-    st.warning('Please enter your username and password')
