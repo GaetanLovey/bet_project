@@ -69,6 +69,7 @@ def login_page():
             st.session_state['authenticated'] = True
             st.session_state['username'] = username
             st.success('Login successful')
+            st.experimental_rerun()  # Recharger la page pour appliquer l'état d'authentification
         else:
             st.error('Invalid username or password')
 
@@ -80,7 +81,7 @@ def main_page():
     if st.button('Logout'):
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
-        st.experimental_rerun()
+        st.experimental_rerun()  # Recharger la page pour appliquer l'état de déconnexion
 
     # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
     df = pd.read_excel('df.xlsx')
