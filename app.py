@@ -152,8 +152,8 @@ def signup_page():
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=f"http://localhost:8501/success?username={quote(username)}",  # URL de succès du paiement
-                cancel_url="http://localhost:8501?payment-cancel=1",    # URL d'annulation du paiement
+                success_url="https://betproject.streamlit.app/success",  # URL de succès du paiement
+                cancel_url="https://betproject.streamlit.app?payment-cancel=1",    # URL d'annulation du paiement
             )
             st.markdown(f"[Complete your payment]({session.url})")
         except stripe.error.StripeError as e:
@@ -169,8 +169,8 @@ def success_page():
     username = st.experimental_get_query_params().get('username', [''])[0]
     if username:
         update_payment_status(username)
-        st.title('Payment Successful')
-        st.success(f'Payment successful! Redirecting to main page...')
+        st.session_state['authenticated'] = True
+        st.session_state['username'] = username
         st.experimental_rerun()
 
 # Gestion des états de l'application
