@@ -171,7 +171,7 @@ if 'payment-success' in query_params:
     st.success('Your payment was successful. Your account has been created.')
     update_payment_status(st.session_state['username'])  # Mise à jour du statut de paiement
     main_page()  # Afficher la page principale après le succès du paiement
-    st.stop()  # Arrêter l'exécution après la page principale
+    # st.stop()  # Arrêter l'exécution après la page principale
 
 elif 'payment-cancel' in query_params:
     cancel_page()
