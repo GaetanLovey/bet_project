@@ -180,16 +180,17 @@ def success_page():
 
     # Afficher un message de succès ou rediriger l'utilisateur
     st.success('Payment successful! Redirecting to the main page...')
-
-    # Rediriger vers la page principale après un court délai
-    st.experimental_set_query_params()
-    st.experimental_rerun()
-
+    
     # Bouton Log Out
     if st.button('Log Out'):
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
         st.experimental_rerun()
+
+    # Rediriger vers la page principale après un court délai
+    st.experimental_set_query_params()
+    st.experimental_rerun()
+
 
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
