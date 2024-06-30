@@ -43,7 +43,7 @@ def create_user(username, password, subscription):
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
     users[username] = {'password': hashed_password, 'authenticated': False, 'subscription': subscription, 'paid': False}
 
-    # Écriture de tous les utilisateurs dans le fichier CSV (dans signup_page())
+    # Écriture de tous les utilisateurs dans le fichier CSV
     with open('users.csv', 'w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
         writer.writeheader()
@@ -64,7 +64,11 @@ def check_credentials(username, password):
         hashed_password = users[username]['password']
         # Comparaison du mot de passe haché
         if hashed_password == hashlib.sha256(password.encode()).hexdigest():
-            return True
+            if users[username]['paid']:  # Vérification de l'état de paiement
+                return True
+            else:
+                st.error('Payment not verified. Please complete the payment process.')
+                return False
     return False
 
 # Mise à jour de l'état de paiement dans le fichier CSV
@@ -99,7 +103,7 @@ def login_page():
             # Actualiser la page pour appliquer les changements d'authentification
             st.experimental_rerun()
         else:
-            st.error('Invalid username or password')
+            st.error('Invalid username, password, or payment not verified.')
 
 # Page principale après connexion
 def main_page(username):
