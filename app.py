@@ -44,6 +44,17 @@ def create_user(username, password, subscription):
     users[username] = {'password': hashed_password, 'authenticated': False, 'subscription': subscription, 'paid': False}
 
     # Écriture de tous les utilisateurs dans le fichier CSV (dans signup_page())
+    with open('users.csv', 'w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=['Username', 'Password', 'Subscription', 'Paid'])
+        writer.writeheader()
+        for user, details in users.items():
+            writer.writerow({
+                'Username': user,
+                'Password': details['password'],
+                'Subscription': details['subscription'],
+                'Paid': 'True' if details['paid'] else 'False'
+            })
+
     return users
 
 # Vérification des identifiants de connexion
@@ -180,12 +191,6 @@ def success_page():
 
     # Afficher un message de succès ou rediriger l'utilisateur
     st.success('Payment successful! Redirecting to the main page...')
-
-    # Bouton Log Out
-    if st.button('Log Out'):
-        st.session_state['authenticated'] = False
-        st.session_state['username'] = None
-        st.experimental_rerun()
 
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
