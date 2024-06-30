@@ -196,6 +196,12 @@ def success_page():
     # Afficher un message de succès ou rediriger l'utilisateur
     st.success('Payment successful! Redirecting to the main page...')
 
+    # Ajout du bouton de déconnexion sur la page de succès
+    if st.button('Log Out'):
+        st.session_state['authenticated'] = False
+        st.session_state['username'] = None
+        st.experimental_rerun()
+
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
