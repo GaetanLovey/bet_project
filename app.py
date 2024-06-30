@@ -207,10 +207,8 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
     st.session_state['username'] = None
 
-# Vérifier si l'URL contient le paramètre de succès après le paiement
-if st.experimental_get_query_params().get('payment-success'):
-    success_page()  # Afficher la page de succès de paiement
-elif st.session_state['authenticated']:
+# Afficher la bonne page en fonction de l'état d'authentification
+if st.session_state['authenticated']:
     main_page(st.session_state['username'])  # Afficher la page principale si l'utilisateur est authentifié
 else:
     st.write('Welcome to Bet Project')
@@ -221,3 +219,7 @@ else:
         signup_page()  # Afficher la page de création de compte
     elif option == 'Login':
         login_page()  # Afficher la page de login
+
+# Vérifier si l'URL contient le paramètre de succès après le paiement
+if st.experimental_get_query_params().get('payment-success'):
+    success_page()  # Afficher la page de succès de paiement
