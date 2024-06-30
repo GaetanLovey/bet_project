@@ -107,13 +107,14 @@ def login_page():
 
 # Page principale après connexion
 def main_page(username):
-    st.title(f'Welcome to Bet Project, {username}!')
 
     # Bouton Log Out
     if st.button('Log Out'):
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
         st.experimental_rerun()
+        
+    st.title(f'Welcome to Bet Project, {username}!')
 
     # Utilisation des fonctions importées pour charger et afficher les données
     df = load_data()
