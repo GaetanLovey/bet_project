@@ -124,8 +124,13 @@ def main_page(username):
 
     st.write("Loterie romande :")
     def scrape_data():
-        chromedriver_path = '/Users/Gaetan_1/Documents Macbook/GitHub/bet_project/chromedriver-mac-arm64/chromedriver'  # Spécifiez le chemin correct
+        chromedriver_path = '/Users/Gaetan_1/Documents Macbook/GitHub/bet_project/chromedriver-mac-arm64/chromedriver'
         driver = initialize_driver(chromedriver_path)
+
+        if not driver:
+            st.error("Failed to initialize webdriver. Please check the configuration.")
+            return None
+        
         main_url = 'https://jeux.loro.ch/sports/hub/240?sport=FOOT'
         open_main_page(driver, main_url)
         df = scroll_and_load(driver)
