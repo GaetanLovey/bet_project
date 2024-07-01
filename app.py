@@ -4,7 +4,6 @@ import stripe
 import csv
 import hashlib
 from data_fetching import load_data, get_sports_list, fetch_and_display_odds
-from loterie_romande import initialize_driver, open_main_page, scroll_and_load
 from urllib.parse import quote  # Importer la fonction quote pour l'encodage d'URL
 
 # Clé API à utiliser pour les appels de données sportives
@@ -118,30 +117,12 @@ def main_page(username):
     st.title(f'Welcome to Bet Project, {username}!')
 
     # Utilisation des fonctions importées pour charger et afficher les données
-    df = load_data()
+    df, loterie_romande = load_data()
     st.write("Bookmaker above average :")
     st.dataframe(df)
 
     st.write("Loterie romande :")
-    def scrape_data():
-        chromedriver_path = '/Users/Gaetan_1/Documents Macbook/GitHub/bet_project/chromedriver-mac-arm64/chromedriver'
-        driver = initialize_driver(chromedriver_path)
-
-        if not driver:
-            st.error("Failed to initialize webdriver. Please check the configuration.")
-            return None
-        
-        main_url = 'https://jeux.loro.ch/sports/hub/240?sport=FOOT'
-        open_main_page(driver, main_url)
-        df = scroll_and_load(driver)
-        driver.quit()
-        return df
-    
-    # Bouton pour lancer le scraping
-    if st.button('Scrape Data'):
-        loterie_romande = scrape_data()
-        st.dataframe(loterie_romande)
-        st.success("Scraping completed and data displayed below")
+    st.dataframe(loterie_romande)
 
     # Récupération de la liste des sports disponibles
     sports_list = get_sports_list(API_KEY)

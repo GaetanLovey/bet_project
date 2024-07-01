@@ -8,5 +8,3 @@ IPython
 display
 streamlit-authenticator
 stripe
-selenium
-bs4

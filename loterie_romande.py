@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import time
 import pandas as pd
 
-def initialize_driver(chromedriver_path='/path/to/chromedriver'):
+def initialize_driver(chromedriver_path):
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Exécuter Chrome en mode headless
     chrome_options.add_argument("--no-sandbox")
@@ -81,14 +81,16 @@ def extract_data(driver):
     return matches_data
 
 def main():
-    chromedriver_path = '/path/to/chromedriver'  # Spécifiez le chemin correct
+    chromedriver_path = '/Users/Gaetan_1/Documents Macbook/GitHub/bet_project/chromedriver-mac-arm64/chromedriver'
     driver = initialize_driver(chromedriver_path)
     main_url = 'https://jeux.loro.ch/sports/hub/240?sport=FOOT'
     open_main_page(driver, main_url)
     df = scroll_and_load(driver)
-    df.to_excel('loterie_romande.xlsx')
+    df.to_excel('loterie_romande.xlsx', index=False)
     driver.quit()
     return df
 
 if __name__ == "__main__":
     main()
+
+

@@ -7,7 +7,9 @@ import requests
 # Lecture du DataFrame à partir d'un fichier Excel local (à remplacer par votre propre source de données)
 def load_data():
     df = pd.read_excel('df.xlsx')
-    return df
+    loterie_romande = pd.read_excel('/loterie_romande.xlsx')
+
+    return df, loterie_romande
 
 SPORTS_URL = 'https://api.the-odds-api.com/v4/sports'
 ODDS_URL = 'https://api.the-odds-api.com/v4/sports/{sport}/odds'
