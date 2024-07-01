@@ -127,13 +127,13 @@ def main_page(username):
         driver = initialize_driver()
         main_url = 'https://jeux.loro.ch/sports/hub/240?sport=FOOT'
         open_main_page(driver, main_url)
-        df = scroll_and_load(driver)
+        loterie_romande = scroll_and_load(driver)
         driver.quit()
-        return df
+        return loterie_romande
     # Bouton pour lancer le scraping
     if st.button('Scrape Data'):
-        df = scrape_data()
-        st.dataframe(df)
+        loterie_romande = scrape_data()
+        st.dataframe(loterie_romande)
         st.success("Scraping completed and data displayed below")
 
     # Récupération de la liste des sports disponibles
