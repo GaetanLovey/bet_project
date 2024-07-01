@@ -1,0 +1,1 @@
+/Users/Gaetan_1/miniforge3/envs/env_tf/bin/python "/Users/Gaetan_1/Documents Macbook/GitHub/bet_project/loterie_romande.py"
