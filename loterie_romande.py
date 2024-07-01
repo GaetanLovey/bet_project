@@ -86,7 +86,6 @@ def main():
     main_url = 'https://jeux.loro.ch/sports/hub/240?sport=FOOT'
     open_main_page(driver, main_url)
     df = scroll_and_load(driver)
-    df['new_col'] = 'test'
     print(df)
     df.to_excel('/Users/Gaetan_1/Documents Macbook/GitHub/bet_project/loterie_romande.xlsx', index=False)
     driver.quit()

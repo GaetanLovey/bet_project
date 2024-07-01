@@ -118,16 +118,18 @@ def main_page(username):
 
     # Utilisation des fonctions importées pour charger et afficher les données
     df, loterie_romande = load_data()
-    st.write("Bookmaker above average :")
+    
+    st.subheader("Bookmaker above average:")
     st.dataframe(df)
 
-    st.write("Loterie romande :")
+    st.subheader("Loterie romande:")
     st.dataframe(loterie_romande)
 
     # Récupération de la liste des sports disponibles
     sports_list = get_sports_list(API_KEY)
 
     # Utilisation de st.sidebar pour placer les widgets de sélection dans le sidebar
+    st.sidebar.title('Options')
     sport_keys = st.sidebar.multiselect('Choose sports:', sports_list)
     regions = st.sidebar.multiselect('Choose regions:', ['eu', 'uk', 'us', 'au'], default=['us'])
     markets = st.sidebar.selectbox('Choose markets:', ['h2h', 'spreads', 'totals'], index=0)
