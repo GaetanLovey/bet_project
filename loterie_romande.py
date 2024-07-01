@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import time
 import pandas as pd
 
-def initialize_driver():
+def initialize_driver(chromedriver_path='/path/to/chromedriver'):
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Exécuter Chrome en mode headless
     chrome_options.add_argument("--no-sandbox")
@@ -16,7 +16,7 @@ def initialize_driver():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
 
-    service = ChromeService(executable_path='/path/to/chromedriver')  # Assurez-vous que le chemin est correct
+    service = ChromeService(executable_path=chromedriver_path)  # Assurez-vous que le chemin est correct
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.execute_script("document.body.style.zoom='10%'")
     return driver
@@ -81,7 +81,8 @@ def extract_data(driver):
     return matches_data
 
 def main():
-    driver = initialize_driver()
+    chromedriver_path = '/path/to/chromedriver'  # Spécifiez le chemin correct
+    driver = initialize_driver(chromedriver_path)
     main_url = 'https://jeux.loro.ch/sports/hub/240?sport=FOOT'
     open_main_page(driver, main_url)
     df = scroll_and_load(driver)

@@ -124,12 +124,13 @@ def main_page(username):
 
     st.write("Loterie romande :")
     def scrape_data():
-        driver = initialize_driver()
+        chromedriver_path = '/Applications/chrome-mac-arm64'  # Spécifiez le chemin correct
+        driver = initialize_driver(chromedriver_path)
         main_url = 'https://jeux.loro.ch/sports/hub/240?sport=FOOT'
         open_main_page(driver, main_url)
-        loterie_romande = scroll_and_load(driver)
+        df = scroll_and_load(driver)
         driver.quit()
-        return loterie_romande
+        return df
     
     # Bouton pour lancer le scraping
     if st.button('Scrape Data'):
