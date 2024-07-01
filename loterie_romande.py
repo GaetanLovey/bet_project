@@ -1,14 +1,23 @@
-# loterie_romande.py
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import time
 import pandas as pd
 
 def initialize_driver():
-    driver = webdriver.Chrome()
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Exécuter Chrome en mode headless
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080")
+
+    service = ChromeService(executable_path='/path/to/chromedriver')  # Assurez-vous que le chemin est correct
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.execute_script("document.body.style.zoom='10%'")
     return driver
 

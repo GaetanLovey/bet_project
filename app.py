@@ -130,6 +130,7 @@ def main_page(username):
         loterie_romande = scroll_and_load(driver)
         driver.quit()
         return loterie_romande
+    
     # Bouton pour lancer le scraping
     if st.button('Scrape Data'):
         loterie_romande = scrape_data()
