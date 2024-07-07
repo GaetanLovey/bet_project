@@ -52,6 +52,7 @@ def update_payment_status(username):
 def logout():
     st.session_state.authenticated = False
     st.session_state.username = None
+    st.experimental_rerun()
 
 # Page de connexion
 def login_page():
