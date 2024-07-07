@@ -8,3 +8,5 @@ IPython
 display
 streamlit-authenticator
 stripe
+sqlalchemy
+sqlite
