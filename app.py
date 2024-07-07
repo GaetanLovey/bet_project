@@ -93,7 +93,8 @@ def main_page(username):
         fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
 
     if st.sidebar.button('Log Out'):
-        st.experimental_set_query_params(logout='true')
+        st.session_state.clear()
+        st.experimental_set_query_params()
         st.experimental_rerun()
 
 # Page de création de compte
@@ -158,13 +159,7 @@ if 'authenticated' not in st.session_state:
 
 params = st.experimental_get_query_params()
 
-if params.get('logout'):
-    st.session_state.authenticated = False
-    st.session_state.username = None
-    st.experimental_set_query_params()
-    st.success('Logged out successfully.')
-    st.experimental_rerun()
-elif params.get('payment-success'):
+if params.get('payment-success'):
     success_page()
 elif st.session_state.authenticated:
     main_page(st.session_state.username)
