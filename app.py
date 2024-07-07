@@ -67,12 +67,6 @@ def login_page():
 
 # Page principale après connexion
 def main_page(username):
-
-    if st.button('Log Out'):
-        st.session_state['authenticated'] = False
-        st.session_state['username'] = None
-        st.experimental_rerun()  # Recharger immédiatement la page après la déconnexion
-        
     st.title(f'Welcome to Bet Project, {username}!')
 
     df, loterie_romande = load_data()
@@ -94,6 +88,11 @@ def main_page(username):
 
     if st.sidebar.button('Fetch'):
         fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
+
+    if st.sidebar.button('Log Out'):
+        st.session_state['authenticated'] = False
+        st.session_state['username'] = None
+        st.experimental_rerun()  # Recharger immédiatement la page après la déconnexion
 
 # Page de création de compte
 def signup_page():
