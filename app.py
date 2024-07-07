@@ -93,9 +93,9 @@ def main_page(username):
         fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
 
     if st.sidebar.button('Log Out'):
-        st.session_state.clear()
-        st.experimental_set_query_params()
-        st.experimental_rerun()
+        st.session_state.authenticated = False
+        st.session_state.username = None
+        st.success('Logged out successfully.')
 
 # Page de création de compte
 def signup_page():
