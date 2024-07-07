@@ -6,13 +6,6 @@ from data_fetching import load_data, get_sports_list, fetch_and_display_odds
 from urllib.parse import quote
 from models import User, SessionLocal, engine
 
-# Initialisation des variables d'état
-if 'logout_requested' not in st.session_state:
-    st.session_state.logout_requested = False
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-    st.session_state.username = None
-
 # Clé API à utiliser pour les appels de données sportives
 API_KEY = '9a58d306f402d400af1cafd8c6152ec9'
 
@@ -73,13 +66,6 @@ def login_page():
 
 # Page principale après connexion
 def main_page(username):
-    if st.sidebar.button('Log Out'):
-        st.session_state.logout_requested = True
-        st.session_state.authenticated = False
-        st.session_state.username = None
-        st.success('Logged out successfully. Redirecting to login page...')
-        return
-
     st.title(f'Welcome to Bet Project, {username}!')
 
     if st.session_state.get('payment_success'):
@@ -105,6 +91,10 @@ def main_page(username):
 
     if st.sidebar.button('Fetch'):
         fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
+
+    if st.sidebar.button('Log Out'):
+        st.experimental_set_query_params(logout='true')
+        st.experimental_rerun()
 
 # Page de création de compte
 def signup_page():
@@ -162,11 +152,19 @@ def success_page():
         st.experimental_rerun()
 
 # Gestion des états de l'application
-if st.session_state.logout_requested:
-    st.session_state.logout_requested = False
-    st.experimental_rerun()
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+    st.session_state.username = None
 
-if st.experimental_get_query_params().get('payment-success'):
+params = st.experimental_get_query_params()
+
+if params.get('logout'):
+    st.session_state.authenticated = False
+    st.session_state.username = None
+    st.experimental_set_query_params()
+    st.success('Logged out successfully.')
+    st.experimental_rerun()
+elif params.get('payment-success'):
     success_page()
 elif st.session_state.authenticated:
     main_page(st.session_state.username)
