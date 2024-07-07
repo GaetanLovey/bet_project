@@ -48,6 +48,11 @@ def update_payment_status(username):
         user.paid = True
         db.commit()
 
+# Fonction de déconnexion
+def logout():
+    st.session_state.authenticated = False
+    st.session_state.username = None
+
 # Page de connexion
 def login_page():
     st.title('Login')
@@ -92,10 +97,7 @@ def main_page(username):
     if st.sidebar.button('Fetch'):
         fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
 
-    if st.sidebar.button('Log Out'):
-        st.session_state.authenticated = False
-        st.session_state.username = None
-        st.success('Logged out successfully.')
+    st.sidebar.button('Log Out', on_click=logout)
 
 # Page de création de compte
 def signup_page():
