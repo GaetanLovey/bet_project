@@ -60,7 +60,6 @@ def login_page():
             st.session_state['authenticated'] = True
             st.session_state['username'] = username
             st.success('Login successful')
-
             st.experimental_rerun()
         else:
             st.error('Invalid username, password, or payment not verified.')
