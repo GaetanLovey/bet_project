@@ -3,7 +3,7 @@ import pandas as pd
 import stripe
 import hashlib
 from data_fetching import load_data, get_sports_list, fetch_and_display_odds
-from urllib.parse import quote  # Importer la fonction quote pour l'encodage d'URL
+from urllib.parse import quote
 from models import User, SessionLocal, engine
 
 # Clé API à utiliser pour les appels de données sportives
@@ -150,11 +150,6 @@ def success_page():
         st.experimental_rerun()
 
     st.success('Payment successful! Redirecting to the main page...')
-
-    if st.button('Log Out'):
-        st.session_state['authenticated'] = False
-        st.session_state['username'] = None
-        st.experimental_rerun()
 
 # Gestion des états de l'application
 if 'authenticated' not in st.session_state:
