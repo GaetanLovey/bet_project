@@ -71,7 +71,7 @@ def main_page(username):
     if st.button('Log Out'):
         st.session_state['authenticated'] = False
         st.session_state['username'] = None
-        st.experimental_rerun()
+        st.experimental_rerun()  # Recharger immédiatement la page après la déconnexion
         
     st.title(f'Welcome to Bet Project, {username}!')
 
