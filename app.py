@@ -163,6 +163,8 @@ params = st.experimental_get_query_params()
 
 if params.get('payment-success'):
     success_page()
+elif params.get('payment-cancel'):
+    cancel_page()
 elif st.session_state.authenticated:
     main_page(st.session_state.username)
 else:
