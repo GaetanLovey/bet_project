@@ -48,11 +48,6 @@ def update_payment_status(username):
         user.paid = True
         db.commit()
 
-# Fonction de déconnexion
-def logout():
-    st.session_state.authenticated = False
-    st.session_state.username = None
-
 # Page de connexion
 def login_page():
     st.title('Login')
@@ -97,7 +92,10 @@ def main_page(username):
     if st.sidebar.button('Fetch'):
         fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
 
-    st.sidebar.button('Log Out', on_click=logout)
+    if st.sidebar.button('Log Out'):
+        st.session_state.clear()
+        st.experimental_set_query_params(logout='true')
+        st.experimental_rerun()
 
 # Page de création de compte
 def signup_page():
@@ -161,7 +159,11 @@ if 'authenticated' not in st.session_state:
 
 params = st.experimental_get_query_params()
 
-if params.get('payment-success'):
+if params.get('logout'):
+    st.session_state.clear()
+    st.success('Logged out successfully.')
+    st.experimental_set_query_params()
+elif params.get('payment-success'):
     success_page()
 elif st.session_state.authenticated:
     main_page(st.session_state.username)
@@ -174,3 +176,12 @@ else:
         signup_page()
     elif option == 'Login':
         login_page()
+
+# JavaScript pour forcer le rechargement de la page
+st.markdown("""
+<script>
+    if (window.location.href.includes('logout=true')) {
+        window.location.href = window.location.href.split('?')[0];
+    }
+</script>
+""", unsafe_allow_html=True)
