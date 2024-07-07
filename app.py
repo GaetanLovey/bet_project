@@ -66,12 +66,11 @@ def login_page():
 
 # Page principale après connexion
 def main_page(username):
+    st.title(f'Welcome to Bet Project, {username}!')
+
     if st.session_state.get('payment_success'):
         st.success('Payment successful! Welcome to the main page.')
         st.session_state['payment_success'] = False
-        st.session_state['authenticated'] = True
-
-    st.title(f'Welcome to Bet Project, {username}!')
 
     df, loterie_romande = load_data()
     
@@ -148,9 +147,9 @@ def success_page():
     username = st.experimental_get_query_params().get('username', [''])[0]
     if username:
         update_payment_status(username)
-        st.success('Payment successful! Redirecting to the main page...')
-        st.session_state['payment_success'] = True
+        st.session_state['authenticated'] = True
         st.session_state['username'] = username
+        st.session_state['payment_success'] = True
         st.experimental_set_query_params()
         st.experimental_rerun()
 
