@@ -52,7 +52,7 @@ def update_payment_status(username):
 def logout():
     st.session_state.authenticated = False
     st.session_state.username = None
-    st.experimental_rerun()
+    st.session_state.logout_trigger = not st.session_state.logout_trigger  # Change the state to trigger a rerun
 
 # Page de connexion
 def login_page():
@@ -98,7 +98,8 @@ def main_page(username):
     if st.sidebar.button('Fetch'):
         fetch_and_display_odds(API_KEY, sport_keys, regions, markets, odds_format, date_format)
 
-    st.sidebar.button('Log Out', on_click=logout)
+    if st.sidebar.button('Log Out'):
+        logout()
 
 # Page de création de compte
 def signup_page():
@@ -159,6 +160,8 @@ def success_page():
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
     st.session_state.username = None
+if 'logout_trigger' not in st.session_state:
+    st.session_state.logout_trigger = False
 
 params = st.experimental_get_query_params()
 
